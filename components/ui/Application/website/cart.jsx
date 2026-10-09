@@ -146,6 +146,8 @@ const Cart = ({ active }) => {
   const { products, count } = useSelector((store) => store.cartStore);
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  // Demo 2 (light storefront) keeps its own checkout and a light drawer
+  const isDemo2 = pathname?.startsWith("/demo-2");
 
   // Route change হলে Cart Auto Close হবে
   useEffect(() => {
@@ -225,7 +227,7 @@ const Cart = ({ active }) => {
 
       <SheetContent
         side="right"
-        className="w-72 !sm:w-60 md:w-[400px] lg:w-[400px] p-0 bg-[#0F2109] border-l border-[#1C3A13] text-white flex flex-col shadow-2xl z-[150] will-change-transform ease-out data-[state=open]:duration-300 data-[state=closed]:duration-200"
+        className={`${isDemo2 ? "sfg-cart-light " : ""}w-72 !sm:w-60 md:w-[400px] lg:w-[400px] p-0 bg-[#0F2109] border-l border-[#1C3A13] text-white flex flex-col shadow-2xl z-[150] will-change-transform ease-out data-[state=open]:duration-300 data-[state=closed]:duration-200`}
       >
         {/* HEADER */}
         <SheetHeader className="px-6 py-4 border-b border-[#1C3A13] flex flex-row items-center justify-between">
@@ -346,7 +348,7 @@ const Cart = ({ active }) => {
             </p>
 
             <Link
-              href="/checkout"
+              href={isDemo2 ? "/demo-2/checkout" : "/checkout"}
               onClick={handleCheckoutClick}
               className="block"
             >

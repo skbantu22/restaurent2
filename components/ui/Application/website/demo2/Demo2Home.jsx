@@ -110,7 +110,7 @@ function Hero() {
               Explore the Menu <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
             </a>
             <Link
-              href="/shop"
+              href="#menu"
               className="flex h-12 items-center gap-2 rounded-full border-2 border-[#2F6B16] px-6 text-sm font-bold text-[#2F6B16] transition-colors hover:bg-[#2F6B16] hover:text-white"
             >
               <ShoppingBag size={17} /> Order Online
@@ -388,7 +388,7 @@ function SpecialAndOffers() {
             </span>
             <h3 className="font-d2-display mt-4 text-4xl leading-tight sm:text-5xl">{name}</h3>
             <p className="font-d2-display mt-3 text-4xl text-[#F7C318]">£{price}</p>
-            <Link href="/shop" className="mt-5 flex h-11 w-fit items-center gap-2 rounded-full bg-[#E1262D] px-6 text-sm font-bold">
+            <Link href="#menu" className="mt-5 flex h-11 w-fit items-center gap-2 rounded-full bg-[#E1262D] px-6 text-sm font-bold">
               Order now <ArrowRight size={16} />
             </Link>
           </div>

@@ -226,6 +226,41 @@
   font-family: var(--font-display), Georgia, serif;
 }
 
+/* Demo 2: light version of the cart drawer (cart.jsx adds .sfg-cart-light) */
+.sfg-cart-light {
+  background: #fffbf2 !important;
+  color: #1f3313 !important;
+  border-color: rgba(31, 51, 19, 0.1) !important;
+}
+.sfg-cart-light .text-white,
+.sfg-cart-light .text-gray-100 {
+  color: #1f3313 !important;
+}
+.sfg-cart-light .text-gray-300,
+.sfg-cart-light .text-gray-400,
+.sfg-cart-light .text-gray-500 {
+  color: #5b6b52 !important;
+}
+.sfg-cart-light [class*="bg-[#183310]"],
+.sfg-cart-light [class*="bg-[#161616]"] {
+  background: #ffffff !important;
+}
+.sfg-cart-light [class*="bg-[#214419]"],
+.sfg-cart-light [class*="bg-[#1C3A13]"] {
+  background: #f3efe4 !important;
+}
+.sfg-cart-light [class*="border-[#1C3A13]"],
+.sfg-cart-light [class*="border-[#214419]"],
+.sfg-cart-light [class*="border-[#264D1D]"],
+.sfg-cart-light [class*="border-[#2D5A22]"],
+.sfg-cart-light [class*="border-[#333]"] {
+  border-color: rgba(31, 51, 19, 0.12) !important;
+}
+.sfg-cart-light button.bg-[#E1262D],
+.sfg-cart-light .bg-[#E1262D] {
+  color: #ffffff !important;
+}
+
 .font-d2-body {
   font-family: var(--font-d2-body), system-ui, sans-serif;
 }

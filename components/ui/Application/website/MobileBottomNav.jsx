@@ -39,6 +39,9 @@ export default function MobileBottomNav() {
     };
   }, []);
 
+  // Checkout pages have their own sticky Pay button at the bottom
+  if (pathname?.includes("/checkout")) return null;
+
   const isActive = (href) =>
     pathname === href || pathname.startsWith(href + "/");
   const navItem =

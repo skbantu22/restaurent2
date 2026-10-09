@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/databaseconnection";
 import { catchError } from "@/lib/helperfunction";
 import ProductModel from "@/models/Product.model";
 import MediaModel from "@/models/Media.model";
+// Registers the Category schema so populate("category") works even when
+// this is the first route hit on a fresh server / serverless instance.
+import CategoryModel from "@/models/category.model"; // eslint-disable-line no-unused-vars
 import mongoose from "mongoose";
 
 export async function GET(request) {

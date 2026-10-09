@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Clock, MapPin, Phone } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok } from "react-icons/fa6";
 import { Demo2Logo } from "./Demo2Navbar";
-import { USER_TRACK_ORDER, WEBSITE_SHOP } from "@/Route/Websiteroute";
+import { USER_TRACK_ORDER } from "@/Route/Websiteroute";
 
 export default function Demo2Footer() {
   return (
@@ -31,7 +31,7 @@ export default function Demo2Footer() {
           <h3 className="mb-3 text-sm font-black uppercase tracking-[0.16em] text-[#F7C318]">Explore</h3>
           <ul className="space-y-2 text-sm text-white/80">
             <li><Link href="/demo-2#menu" className="hover:text-white">Our Menu</Link></li>
-            <li><Link href={WEBSITE_SHOP} className="hover:text-white">Order Online</Link></li>
+            <li><Link href="/demo-2#menu" className="hover:text-white">Order Online</Link></li>
             <li><Link href="/demo-2#offers" className="hover:text-white">Offers</Link></li>
             <li><Link href={USER_TRACK_ORDER} className="hover:text-white">Track Order</Link></li>
             <li><Link href="/" className="hover:text-white">View Demo 1</Link></li>

@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 
 import Cart from "../cart";
 import { SfgEmblem } from "../SfgLogo";
-import { USER_DASHBOARD, USER_TRACK_ORDER, WEBSITE_LOGIN, WEBSITE_SHOP } from "@/Route/Websiteroute";
+import { USER_DASHBOARD, USER_TRACK_ORDER, WEBSITE_LOGIN } from "@/Route/Websiteroute";
 
 // Light, flyer-style header for Demo 2 (white/cream, red + green + gold).
 const LINKS = [
@@ -17,7 +17,7 @@ const LINKS = [
   { label: "Menu", href: "/demo-2#menu" },
   { label: "Demo 1", href: "/", demo: true },
   { label: "Offers", href: "/demo-2#offers" },
-  { label: "Order Online", href: WEBSITE_SHOP },
+  { label: "Order Online", href: "/demo-2#menu" },
   { label: "Delivery", href: "/demo-2#visit", wide: true },
   { label: "Track Order", href: USER_TRACK_ORDER },
   { label: "Contact", href: "/demo-2#visit", wide: true },
@@ -128,7 +128,7 @@ export default function Demo2Navbar() {
             </Link>
             <Cart />
             <Link
-              href={WEBSITE_SHOP}
+              href="/demo-2#menu"
               className="group hidden md:flex h-11 items-center gap-2 rounded-full bg-[#2F6B16] px-5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#245511]"
             >
               Order Now <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />

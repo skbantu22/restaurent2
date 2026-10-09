@@ -86,7 +86,7 @@ export default function LiveOrderWidget() {
     return () => clearInterval(timer);
   }, [dispatch]);
 
-  if (pathname === "/checkout") return null;
+  if (pathname?.includes("/checkout")) return null;
   if (loading && activeOrders.length === 0) return null;
   if (activeOrders.length === 0) return null;
 
