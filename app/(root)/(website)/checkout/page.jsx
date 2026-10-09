@@ -1,7 +1,7 @@
-import SfgCheckout from "@/components/ui/Application/website/checkout/SfgCheckout";
+import SfgCheckoutWizard from "@/components/ui/Application/website/checkout/SfgCheckoutWizard";
 
 export const metadata = { title: "Checkout | Shawon Food Gate" };
 
 export default function CheckoutPage() {
-  return <SfgCheckout theme="dark" />;
+  return <SfgCheckoutWizard />;
 }
