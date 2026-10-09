@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // The old e-commerce shop is replaced by restaurant online ordering
+  async redirects() {
+    return [{ source: "/shop", destination: "/order-online", permanent: false }];
+  },
   images: {
     domains: ["via.placeholder.com"], // ✅ here
 

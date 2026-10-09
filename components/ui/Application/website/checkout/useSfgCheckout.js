@@ -67,6 +67,11 @@ export default function useSfgCheckout({ theme = "dark", successBase = "" } = {}
 
   useEffect(() => {
     setSlots(timeSlots());
+    // Delivery / Collection chosen on the Order Online page
+    try {
+      const saved = localStorage.getItem("sfg_order_type");
+      if (saved === "pickup" || saved === "delivery") setOrderType(saved);
+    } catch {}
     setCanceled(new URLSearchParams(window.location.search).has("canceled"));
     setForm((f) => ({
       ...f,

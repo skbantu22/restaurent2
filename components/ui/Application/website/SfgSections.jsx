@@ -138,7 +138,7 @@ export function TodaysSpecial() {
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <span className="font-display text-4xl font-black text-[#F7C318]">£{s.price}</span>
               <Link
-                href="/shop"
+                href="/order-online"
                 className="group flex h-12 items-center gap-2 rounded-full bg-[#F7C318] px-6 text-sm font-extrabold text-[#0A1806] transition-all hover:-translate-y-0.5"
               >
                 Order Today&apos;s Special

@@ -59,8 +59,7 @@ function groupOpeningHours(openingHours) {
 }
 
 const QUICK_LINKS = [
-  { label: "Our Menu", href: "/#our-menu" },
-  { label: "Order Online", href: WEBSITE_SHOP },
+  { label: "Our Menu", href: WEBSITE_SHOP },
   { label: "Delivery & Collection", href: "/#delivery" },
   { label: "Offers", href: "/#offers" },
   { label: "Track Your Order", href: USER_TRACK_ORDER },
@@ -108,7 +107,7 @@ export default function Footer() {
               href={WEBSITE_SHOP}
               className="group flex h-12 items-center gap-2 rounded-full bg-[#F7C318] px-6 text-sm font-extrabold text-[#0A1806] transition-transform hover:-translate-y-0.5"
             >
-              Order Online <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              View Menu <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <a
               href={`tel:${phone.replace(/\s/g, "")}`}

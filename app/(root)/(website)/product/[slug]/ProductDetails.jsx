@@ -69,7 +69,7 @@ const ProductDetails = ({
     { label: "Home", href: "/" },
     {
       label: product?.category?.name || "Category",
-      href: `/shop?category=${product?.category?.slug || ""}`,
+      href: "/order-online",
     },
     { label: product?.name || "Product" },
   ];

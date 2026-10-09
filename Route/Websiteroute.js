@@ -8,7 +8,7 @@ export const WEBSITE_RESETPASSWORD = "/auth/reset-password";
 
 export const WEBSITE_USER_DASHBOARD = "/my-account";
 
-export const WEBSITE_SHOP = "/shop";
+export const WEBSITE_SHOP = "/order-online";
 export const WEBSITE_CART = "/cart";
 
 export const WEBSITE_PRODUCT_DETAILS = (slug) =>

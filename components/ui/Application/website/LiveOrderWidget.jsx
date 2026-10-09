@@ -86,7 +86,8 @@ export default function LiveOrderWidget() {
     return () => clearInterval(timer);
   }, [dispatch]);
 
-  if (pathname?.includes("/checkout")) return null;
+  // Checkout and the ordering page have their own basket bars at the bottom
+  if (pathname?.includes("/checkout") || pathname?.startsWith("/order-online")) return null;
   if (loading && activeOrders.length === 0) return null;
   if (activeOrders.length === 0) return null;
 

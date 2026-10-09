@@ -17,7 +17,6 @@ const LINKS = [
   { label: "Menu", href: "/demo-2#menu" },
   { label: "Demo 1", href: "/", demo: true },
   { label: "Offers", href: "/demo-2#offers" },
-  { label: "Order Online", href: "/demo-2#menu" },
   { label: "Delivery", href: "/demo-2#visit", wide: true },
   { label: "Track Order", href: USER_TRACK_ORDER },
   { label: "Contact", href: "/demo-2#visit", wide: true },
@@ -127,12 +126,6 @@ export default function Demo2Navbar() {
               <span className="hidden 2xl:inline">{auth ? "My Account" : "Login / Sign Up"}</span>
             </Link>
             <Cart />
-            <Link
-              href="/demo-2#menu"
-              className="group hidden md:flex h-11 items-center gap-2 rounded-full bg-[#2F6B16] px-5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-[#245511]"
-            >
-              Order Now <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </Link>
           </div>
         </div>
         <div className="h-[3px] bg-[linear-gradient(90deg,#E1262D_0_33%,#F7C318_33%_66%,#2F6B16_66%)]" />

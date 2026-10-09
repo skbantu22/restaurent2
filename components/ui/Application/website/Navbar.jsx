@@ -41,9 +41,8 @@ export const SFG_PHONE_HREF = "tel:+442039956692";
 
 const NAV_LINKS = [
   { label: "Home", href: WEBSITE_HOME },
-  { label: "Menu", href: "/#our-menu" },
+  { label: "Menu", href: WEBSITE_SHOP },
   { label: "Demo 2", href: "/demo-2" },
-  { label: "Order Online", href: WEBSITE_SHOP },
   { label: "Delivery", href: "/#delivery", wide: true },
   { label: "Collection", href: "/#delivery", wide: true },
   { label: "Track Order", href: USER_TRACK_ORDER },
@@ -203,7 +202,7 @@ const Navbar = () => {
               ))}
             </nav>
 
-            {/* RIGHT: Account, Cart, Order Now */}
+            {/* RIGHT: Account, Cart */}
             <div className="flex items-center gap-1.5 sm:gap-2.5">
               {!auth ? (
                 <Link
@@ -231,14 +230,6 @@ const Navbar = () => {
               )}
 
               <Cart />
-
-              <Link
-                href={WEBSITE_SHOP}
-                className="group hidden md:flex h-11 items-center gap-2 rounded-full bg-[#F7C318] px-5 text-sm font-extrabold text-[#0A1806] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-8px_rgba(247,195,24,0.75)]"
-              >
-                Order Now
-                <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
             </div>
           </div>
         </div>

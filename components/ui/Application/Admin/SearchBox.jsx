@@ -47,7 +47,7 @@ const SearchBox = ({ onSelect }) => {
     const params = new URLSearchParams(searchParams.toString());
     if (q) params.set("q", q);
     else params.delete("q");
-    router.push(`/shop?${params.toString()}`);
+    router.push(`/order-online?${params.toString()}`);
   };
 
   const handleSubmit = (e) => {
@@ -128,7 +128,7 @@ const SearchBox = ({ onSelect }) => {
                     onClick={() => {
                       const params = new URLSearchParams();
                       params.set("category", cat.slug || cat._id);
-                      router.push(`/shop?${params.toString()}`);
+                      router.push(`/order-online?${params.toString()}`);
                       setShowDropdown(false);
                       if (onSelect) onSelect();
                     }}

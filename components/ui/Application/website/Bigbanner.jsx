@@ -132,17 +132,17 @@ export default function HeroSlider() {
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/shop"
+                  href="/order-online"
                   className="group flex h-12 items-center gap-2 rounded-full bg-[#E1262D] px-7 text-sm font-extrabold text-white shadow-[0_12px_30px_-10px_rgba(225,38,45,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C41D23]"
                 >
-                  Order Online
+                  View Menu
                   <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a
-                  href="#our-menu"
+                  href="tel:+442039956692"
                   className="flex h-12 items-center rounded-full border border-white/25 bg-white/5 px-6 text-sm font-bold text-white backdrop-blur transition-colors hover:border-[#F7C318] hover:text-[#F7C318]"
                 >
-                  View Menu
+                  Call to order
                 </a>
                 <div className="flex items-baseline gap-1.5 pl-1">
                   <span className="text-xs font-semibold uppercase tracking-wider text-white/50">

@@ -105,6 +105,106 @@ async function main() {
     );
   }
 
+  // ---- stock locations ----
+  const LOCATIONS = [
+    ["LOC-KITCHEN", "Main Kitchen", "KITCHEN", true],
+    ["LOC-DRY", "Dry Store", "STORAGE", false],
+    ["LOC-FRIDGE", "Walk-in Fridge", "FRIDGE", false],
+    ["LOC-FREEZER", "Freezer", "FREEZER", false],
+  ];
+  const locIds = {};
+  for (const [code, name, type, isDefault] of LOCATIONS) {
+    const r = await db.collection("stock_locations").findOneAndUpdate(
+      { code },
+      { $set: { name, type, address: "179 Forest Ln, London E7 9BB", active: true, isDefault, updatedAt: now }, $setOnInsert: { code, createdAt: now } },
+      { upsert: true, returnDocument: "after" },
+    );
+    locIds[code] = (r?.value ?? r)._id;
+  }
+
+  // ---- recipes (dish -> ingredients used per portion) ----
+  const ing = Object.fromEntries(ingredients.map((i) => [i.doc.name, i.doc]));
+  const RECIPES = [
+    ["Chicken Biryani", [["Basmati Rice", 0.15, "kg"], ["Halal Chicken (whole)", 0.25, "kg"], ["Cooking Oil", 0.02, "l"], ["Onions", 0.05, "kg"]]],
+    ["Lamb Biryani", [["Basmati Rice", 0.15, "kg"], ["Halal Lamb", 0.22, "kg"], ["Cooking Oil", 0.02, "l"], ["Onions", 0.05, "kg"]]],
+    ["Big English Breakfast", [["Eggs", 2, "pcs"], ["Potatoes (Fries)", 0.12, "kg"], ["Cooking Oil", 0.01, "l"]]],
+    ["Karak Chai", [["Tea Leaves (Karak)", 0.005, "kg"], ["Fresh Milk", 0.15, "l"]]],
+    ["Garlic Naan", [["Naan Flour", 0.12, "kg"]]],
+    ["Classic Fries", [["Potatoes (Fries)", 0.2, "kg"], ["Cooking Oil", 0.03, "l"]]],
+  ];
+  let recipeCount = 0;
+  for (const [dish, lines] of RECIPES) {
+    const product = await db.collection("products").findOne({ name: dish, deletedAt: null });
+    if (!product) continue;
+    await db.collection("recipes").updateOne(
+      { product: product._id, active: true },
+      {
+        $set: {
+          name: `${dish} recipe`,
+          version: 1,
+          items: lines.map(([n, quantity, unit]) => ({ ingredient: ing[n]._id, quantity, unit, wastagePercentage: 0, optional: false })),
+          notes: "Demo recipe — quantities per portion",
+          updatedAt: now,
+        },
+        $setOnInsert: { product: product._id, active: true, createdAt: now },
+      },
+      { upsert: true },
+    );
+    recipeCount++;
+  }
+
+  // ---- stock movements: opening balances + some waste ----
+  await db.collection("stock_movements").deleteMany({ referenceNumber: { $regex: /^DEMO-/ } });
+  const moves = [];
+  for (const { doc, cost } of ingredients) {
+    const opening = doc.currentStock + 5;
+    moves.push({
+      ingredient: doc._id, location: locIds["LOC-KITCHEN"], type: "OPENING_BALANCE",
+      quantity: opening, unit: doc.usageUnit, normalizedQuantity: opening, previousStock: 0, newStock: opening,
+      unitCost: cost, totalCost: Math.round(opening * cost * 100) / 100,
+      referenceType: "MANUAL", referenceNumber: `DEMO-OPEN-${doc.ingredientCode}`, reason: "Opening stock", notes: "", createdAt: new Date(now.getTime() - 7 * 86400000),
+    });
+  }
+  const WASTE = [["Fresh Milk", 2, "Expired"], ["Onions", 1.5, "Spoiled"], ["Halal Chicken (whole)", 1, "Dropped / contaminated"]];
+  for (const [name, qty, reason] of WASTE) {
+    const d = ing[name];
+    moves.push({
+      ingredient: d._id, location: locIds["LOC-KITCHEN"], type: "WASTE",
+      quantity: -qty, unit: d.usageUnit, normalizedQuantity: -qty, previousStock: d.currentStock + qty, newStock: d.currentStock,
+      unitCost: d.averageCost, totalCost: Math.round(qty * d.averageCost * 100) / 100,
+      referenceType: "WASTE", referenceNumber: `DEMO-WASTE-${d.ingredientCode}`, reason, notes: "", createdAt: new Date(now.getTime() - 86400000),
+    });
+  }
+  await db.collection("stock_movements").insertMany(moves);
+
+  // ---- staff salaries (this month pending, last month paid) ----
+  const staffUsers = await db.collection("users").find({ role: { $in: ["admin", "manager", "staff"] }, deletedAt: null }).toArray();
+  const POSITION = { admin: ["Owner / Manager", 2800], manager: ["Restaurant Manager", 2400], staff: ["Chef", 2100] };
+  const ym = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const thisMonth = ym(now);
+  const lastMonth = ym(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  let salaryCount = 0;
+  for (const u of staffUsers) {
+    const [position, base] = POSITION[u.role] || ["Staff", 1900];
+    for (const [month, paid] of [[lastMonth, true], [thisMonth, false]]) {
+      const bonus = paid ? 100 : 0;
+      await db.collection("staff_salaries").updateOne(
+        { staff: u._id, month },
+        {
+          $set: {
+            staffName: u.name, position, baseSalary: base, bonus, deductions: 0, netPay: base + bonus,
+            paymentStatus: paid ? "paid" : "pending", paymentMethod: "bank", paidDate: paid ? new Date(now.getFullYear(), now.getMonth(), 1) : null,
+            note: "Demo salary", deletedAt: null, updatedAt: now,
+          },
+          $setOnInsert: { staff: u._id, month, createdAt: now },
+        },
+        { upsert: true },
+      );
+      salaryCount++;
+    }
+  }
+  console.log(`Also: ${LOCATIONS.length} stock locations, ${recipeCount} recipes, ${moves.length} stock movements (${WASTE.length} waste), ${salaryCount} salary records.`);
+
   const low = INGREDIENTS.filter((i) => i[4] <= i[5]).length;
   console.log(`Inventory demo ready: ${SUPPLIERS.length} suppliers, ${INGREDIENTS.length} ingredients (${low} low on stock), ${n} purchase orders.`);
   await mongoose.disconnect();

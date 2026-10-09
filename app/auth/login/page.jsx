@@ -81,8 +81,10 @@ export default function Login() {
         // Staff/admin accounts land in the admin panel; everyone else
         // (customers) goes to their own account page — this previously
         // sent every role to /admin/dashboard regardless.
+        // The login API returns { data: { user: { role } } }
+        const loggedInRole = registerResponse.data?.user?.role || registerResponse.data?.role;
         router.push(
-          registerResponse.data.role === "admin"
+          ["admin", "manager", "staff"].includes(loggedInRole)
             ? ADMIN_DASHBOARD
             : WEBSITE_USER_DASHBOARD,
         );

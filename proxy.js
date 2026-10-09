@@ -29,7 +29,7 @@ export async function proxy(request) {
 
     // 🔁 If logged-in user goes to auth pages → redirect by role
     if (isAuthRoute) {
-      if (role === "admin") {
+      if (role === "admin" || role === "manager") {
         return NextResponse.redirect(new URL(ADMIN_DASHBOARD, request.url));
       }
 
@@ -44,14 +44,14 @@ export async function proxy(request) {
 
     // 🔒 ADMIN ONLY ROUTES
     if (pathname.startsWith("/admin")) {
-      if (role !== "admin" && role !== "staff") {
+      if (!["admin", "manager", "staff"].includes(role)) {
         return NextResponse.redirect(new URL(WEBSITE_LOGIN, request.url));
       }
     }
 
     // 🔒 STAFF RULE (optional strict control)
     if (pathname.startsWith("/admin/pos")) {
-      if (role !== "staff" && role !== "admin") {
+      if (!["admin", "manager", "staff"].includes(role)) {
         return NextResponse.redirect(new URL(WEBSITE_LOGIN, request.url));
       }
     }

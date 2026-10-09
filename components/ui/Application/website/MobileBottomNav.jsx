@@ -22,7 +22,7 @@ export default function MobileBottomNav() {
   const handleSearchSubmit = () => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
-    router.push(`/shop?${params.toString()}`);
+    router.push(`/order-online?${params.toString()}`);
     setShowMobileSearch(false);
   };
 
