@@ -22,10 +22,6 @@ export async function GET() {
     const orders = await OrderModel.find({ userId })
       .sort({ createdAt: -1 })
       .populate("items.productId", "name slug")
-      .populate({
-        path: "items.variantId",
-        populate: { path: "media" },
-      })
       .lean();
 
     const totalOrder = await OrderModel.countDocuments({ userId });

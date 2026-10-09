@@ -11,19 +11,15 @@ import useFetch from "@/hooks/useFetch";
 import { WEBSITE_ORDER_DETAILS } from "@/Route/Websiteroute";
 
 const money = (amount) =>
-  Number(amount || 0).toLocaleString("en-BD", {
-    style: "currency",
-    currency: "GBP",
-    maximumFractionDigits: 0,
-  });
+  Number(amount || 0).toLocaleString("en-GB", { style: "currency", currency: "GBP" });
 
-const statusStyles = {
-  Placed: "bg-amber-100 text-amber-700",
-  Pending: "bg-yellow-100 text-yellow-700",
-  Processing: "bg-blue-100 text-blue-700",
-  Shipped: "bg-sky-100 text-sky-700",
-  Delivered: "bg-green-100 text-green-700",
-  Cancelled: "bg-red-100 text-red-700",
+const STATUS = {
+  placed: ["Received", "bg-amber-100 text-amber-700"],
+  preparing: ["Preparing", "bg-blue-100 text-blue-700"],
+  ready: ["Ready", "bg-emerald-100 text-emerald-700"],
+  out_for_delivery: ["On the way", "bg-sky-100 text-sky-700"],
+  delivered: ["Delivered", "bg-green-100 text-green-700"],
+  cancelled: ["Cancelled", "bg-red-100 text-red-700"],
 };
 
 const MyAccount = () => {
@@ -140,11 +136,11 @@ const MyAccount = () => {
                         <td className="p-4">
                           <span
                             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                              statusStyles[order.status] ||
+                              STATUS[order.orderStatus]?.[1] ||
                               "bg-gray-100 text-gray-700"
                             }`}
                           >
-                            {order.status || "Placed"}
+                            {STATUS[order.orderStatus]?.[0] || "Received"}
                           </span>
                         </td>
                       </tr>
@@ -191,11 +187,11 @@ const MyAccount = () => {
 
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${
-                          statusStyles[order.status] ||
+                          STATUS[order.orderStatus]?.[1] ||
                           "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {order.status || "Placed"}
+                        {STATUS[order.orderStatus]?.[0] || "Received"}
                       </span>
                     </div>
 

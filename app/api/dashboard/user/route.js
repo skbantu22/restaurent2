@@ -1,9 +1,7 @@
 import { isAuthenticated } from "@/lib/auth.server";
 import { connectDB } from "@/lib/databaseconnection";
 import { catchError, response } from "@/lib/helperfunction";
-import MediaModel from "@/models/Media.model";
 import OrderModel from "@/models/Order.model";
-import ProductModel from "@/models/Product.model";
 
 export async function GET() {
   try {
@@ -17,17 +15,15 @@ export async function GET() {
 
     const userId = auth.userId;
 
-    const recentOrders = await OrderModel.find({ userId })
+    // Restaurant orders store name/price/image on each item, so only the
+    // product link is populated (the old fashion-shop "variantId" is gone)
+    const recentOrders = await OrderModel.find({ userId, deletedAt: null })
       .sort({ createdAt: -1 })
       .limit(10)
       .populate("items.productId", "name slug")
-      .populate({
-        path: "items.variantId",
-        populate: { path: "media" },
-      })
       .lean();
 
-    const totalOrder = await OrderModel.countDocuments({ userId });
+    const totalOrder = await OrderModel.countDocuments({ userId, deletedAt: null });
 
     return response(true, 200, "Dashboard info.", {
       recentOrders,

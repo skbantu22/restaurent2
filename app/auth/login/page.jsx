@@ -7,7 +7,7 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
-import { Eye, EyeOff, LayoutDashboard } from "lucide-react";
+import { Eye, EyeOff, LayoutDashboard, ChefHat, UserCog, User as UserIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 // UI Components - Ensure these paths match your project structure
@@ -76,14 +76,16 @@ export default function Login() {
 
       dispatch(login(registerResponse));
       if (searchParams.has("callback")) {
-        router.push(searchParams.get("callback"));
+        window.location.assign(searchParams.get("callback"));
       } else {
         // Staff/admin accounts land in the admin panel; everyone else
         // (customers) goes to their own account page — this previously
         // sent every role to /admin/dashboard regardless.
         // The login API returns { data: { user: { role } } }
         const loggedInRole = registerResponse.data?.user?.role || registerResponse.data?.role;
-        router.push(
+        // Full page load (not router.push) so the new login cookie is used
+        // straight away instead of a cached "not logged in" redirect.
+        window.location.assign(
           ["admin", "manager", "staff"].includes(loggedInRole)
             ? ADMIN_DASHBOARD
             : WEBSITE_USER_DASHBOARD,
@@ -100,20 +102,19 @@ export default function Login() {
     }
   };
 
-  // Demo only: one-click admin login (enabled by NEXT_PUBLIC_DEMO_ADMIN_LOGIN)
-  const [demoLoading, setDemoLoading] = useState(false);
-  const handleDemoAdmin = async () => {
+  // Demo only: one-click login per role, no password (NEXT_PUBLIC_DEMO_ADMIN_LOGIN)
+  const [demoLoading, setDemoLoading] = useState("");
+  const handleDemo = async (role) => {
     try {
-      setDemoLoading(true);
-      const { data } = await axios.post("/api/auth/demo-login");
+      setDemoLoading(role);
+      const { data } = await axios.post("/api/auth/demo-login", { role });
       if (!data.success) throw new Error(data.message);
       dispatch(login(data));
       showToast("success", data.message);
-      router.push(ADMIN_DASHBOARD);
+      window.location.assign(role === "user" ? WEBSITE_USER_DASHBOARD : role === "staff" ? "/admin/pos" : ADMIN_DASHBOARD);
     } catch (error) {
       showToast("error", error.response?.data?.message || error.message);
-    } finally {
-      setDemoLoading(false);
+      setDemoLoading("");
     }
   };
 
@@ -221,15 +222,30 @@ export default function Login() {
               />
 
               {process.env.NEXT_PUBLIC_DEMO_ADMIN_LOGIN === "true" && (
-                <button
-                  type="button"
-                  onClick={handleDemoAdmin}
-                  disabled={demoLoading}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#F7C318] text-sm font-extrabold uppercase tracking-wide text-[#0A1806] transition-all hover:brightness-105 disabled:opacity-60"
-                >
-                  <LayoutDashboard size={17} />
-                  {demoLoading ? "Opening admin…" : "Enter Admin Panel (Demo)"}
-                </button>
+                <div className="rounded-xl border border-dashed border-[#F7C318]/50 bg-[#F7C318]/5 p-3">
+                  <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.16em] text-[#F7C318]">
+                    Demo · one-click login, no password
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      ["admin", "Admin", LayoutDashboard, "bg-[#F7C318] text-[#0A1806]"],
+                      ["manager", "Manager", UserCog, "bg-[#2D7DD2] text-white"],
+                      ["staff", "Kitchen / POS", ChefHat, "bg-[#7B2CBF] text-white"],
+                      ["user", "Customer", UserIcon, "bg-[#E1262D] text-white"],
+                    ].map(([role, label, Icon, cls]) => (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => handleDemo(role)}
+                        disabled={!!demoLoading}
+                        className={`flex h-11 items-center justify-center gap-2 rounded-md text-[13px] font-extrabold transition-all hover:brightness-110 disabled:opacity-60 ${cls}`}
+                      >
+                        <Icon size={16} />
+                        {demoLoading === role ? "Opening…" : label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
               <div className="relative my-6">

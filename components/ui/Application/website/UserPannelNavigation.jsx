@@ -40,14 +40,14 @@ const UserPanelNavigation = () => {
   };
 
   return (
-    <div className="border shadow-sm p-4 rounded">
+    <div className="rounded-2xl border border-white/10 bg-[#0F2109] p-4 shadow-sm">
       <ul>
         <li className="mb-2">
           <Link
             href={USER_DASHBOARD}
             className={`block p-3 text-sm rounded
-        hover:bg-primary hover:text-white
-        ${pathname.startsWith(USER_DASHBOARD) ? "bg-primary text-white" : ""}`}
+        hover:bg-[#E1262D] hover:text-white
+        ${pathname.startsWith(USER_DASHBOARD) ? "bg-[#E1262D] text-white font-semibold" : "text-white/80"}`}
           >
             Dashboard
           </Link>
@@ -57,8 +57,8 @@ const UserPanelNavigation = () => {
           <Link
             href={USER_PROFILE}
             className={`block p-3 text-sm rounded
-        hover:bg-primary hover:text-white
-        ${pathname.startsWith(USER_PROFILE) ? "bg-primary text-white" : ""}`}
+        hover:bg-[#E1262D] hover:text-white
+        ${pathname.startsWith(USER_PROFILE) ? "bg-[#E1262D] text-white font-semibold" : "text-white/80"}`}
           >
             Profile
           </Link>
@@ -68,8 +68,8 @@ const UserPanelNavigation = () => {
           <Link
             href={USER_ORDER}
             className={`block p-3 text-sm rounded
-        hover:bg-primary hover:text-white
-        ${pathname.startsWith(USER_ORDER) ? "bg-primary text-white" : ""}`}
+        hover:bg-[#E1262D] hover:text-white
+        ${pathname.startsWith(USER_ORDER) ? "bg-[#E1262D] text-white font-semibold" : "text-white/80"}`}
           >
             Orders
           </Link>
@@ -79,8 +79,8 @@ const UserPanelNavigation = () => {
           <Link
             href={USER_WISHLIST}
             className={`block p-3 text-sm rounded
-        hover:bg-primary hover:text-white
-        ${pathname.startsWith(USER_WISHLIST) ? "bg-primary text-white" : ""}`}
+        hover:bg-[#E1262D] hover:text-white
+        ${pathname.startsWith(USER_WISHLIST) ? "bg-[#E1262D] text-white font-semibold" : "text-white/80"}`}
           >
             Favourite Item
           </Link>

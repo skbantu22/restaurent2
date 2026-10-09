@@ -52,11 +52,11 @@ const OrderDetails = async ({ params }) => {
         </thead>
         <tbody>
           {order.items.map((item) => (
-            <tr key={item.variantId._id} className="border-b">
+            <tr key={item.productId?._id || item.productId || item.name} className="border-b">
               <td className="p-3">
                 <div className="flex items-center gap-5">
                   <Image
-                    src={item.variantId?.media?.[0]?.secure_url || placeholderImg.src}
+                    src={item.image || placeholderImg.src}
                     width={60}
                     height={60}
                     alt={item.name || item.productId.name}
