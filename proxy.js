@@ -28,7 +28,10 @@ export async function proxy(request) {
     const role = payload?.role;
 
     // 🔁 If logged-in user goes to auth pages → redirect by role
-    if (isAuthRoute) {
+    // The login page always opens, even when already logged in, so people
+    // can switch account (e.g. customer -> admin demo) instead of being
+    // bounced to /my-account and locked out of the admin panel.
+    if (isAuthRoute && pathname !== "/auth/login") {
       if (role === "admin" || role === "manager") {
         return NextResponse.redirect(new URL(ADMIN_DASHBOARD, request.url));
       }
