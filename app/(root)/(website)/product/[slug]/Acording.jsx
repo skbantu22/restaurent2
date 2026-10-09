@@ -1,0 +1,123 @@
+"use client";
+import { useState, useEffect } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { decode } from "entities";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Plus, Minus } from "lucide-react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
+/**
+ * Updated StyledTrigger:
+ * Smaller min-height and padding on mobile (min-h-[44px])
+ * Full size on desktop (sm:min-h-[56px])
+ */
+const StyledTrigger = ({ title }) => (
+  <div className="flex w-full items-stretch min-h-[44px] sm:min-h-[56px] bg-[#0F2109] border border-[#214419] mb-1 group">
+    <div className="flex-1 flex items-center px-3 sm:px-5 py-2 sm:py-3 transition-colors text-white group-data-[state=open]:text-[#E1262D] group-aria-expanded:text-[#E1262D]">
+      <span className="text-[13px] sm:text-[15px] font-medium uppercase tracking-tight text-left">
+        {title}
+      </span>
+    </div>
+    <div className="w-10 sm:w-14 bg-[#E1262D] flex items-center justify-center text-white shrink-0">
+      <Plus
+        size={16}
+        className="sm:size-[20px] group-data-[state=open]:hidden group-aria-expanded:hidden"
+        strokeWidth={2.5}
+      />
+      <Minus
+        size={16}
+        className="sm:size-[20px] hidden group-data-[state=open]:block group-aria-expanded:block"
+        strokeWidth={2.5}
+      />
+    </div>
+  </div>
+);
+
+export function AccordionBasic({ product }) {
+  const isMobile = useIsMobile();
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full max-w-lg space-y-1 sm:space-y-2"
+    >
+      {/* Product Description */}
+      <AccordionItem value="description" className="border-none">
+        {!isMobile ? (
+          <Sheet modal={false}>
+            <SheetTitle>
+              <VisuallyHidden>Description</VisuallyHidden>
+            </SheetTitle>
+            <SheetTrigger asChild>
+              <button className="w-full focus:outline-none group">
+                <StyledTrigger title="Product Description" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="w-[400px] sm:w-[540px] p-0 overflow-y-auto bg-[#0F2109] border-l border-[#214419]"
+            >
+              <div className="sticky top-0 bg-[#0F2109] border-b border-[#214419] py-5 px-6 font-bold uppercase tracking-widest text-xs text-white">
+                Product Description
+              </div>
+              <div
+                className="p-6 text-sm text-zinc-400 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: decode(product?.description || ""),
+                }}
+              />
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <>
+            <AccordionTrigger className="p-0 hover:no-underline group">
+              <StyledTrigger title="Product Description" />
+            </AccordionTrigger>
+            <AccordionContent className="px-4 py-3 bg-[#0F2109] border-x border-b border-[#214419] text-xs text-zinc-400">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: decode(product?.description || ""),
+                }}
+              />
+            </AccordionContent>
+          </>
+        )}
+      </AccordionItem>
+
+      {/* Freshness note — a burger/menu item obviously has no size
+          chart or 7-day return window, unlike the clothing-store
+          template this page started from. */}
+      <AccordionItem value="freshness" className="border-none">
+        <AccordionTrigger className="p-0 hover:no-underline group">
+          <StyledTrigger title="Freshness & Allergies" />
+        </AccordionTrigger>
+        <AccordionContent className="px-4 py-3 bg-[#0F2109] border-x border-b border-[#214419] text-xs text-zinc-400">
+          Freshly prepared to order. Please let us know about any allergies
+          or dietary requirements before ordering.
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}

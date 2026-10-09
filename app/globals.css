@@ -1,0 +1,427 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-jost);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    width: 100%;
+  }
+}
+
+/* Admin panel color theme — scoped to .admin-theme (applied on the
+   admin section's root, app/(root)/(admin)/admin/layout.jsx) so the
+   public website keeps its own neutral palette untouched. Warm
+   orange/teal/amber instead of the site-wide grayscale tokens. */
+.admin-theme {
+  --background: #fffaf5;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #14b8a6;
+  --secondary-foreground: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
+  --destructive: #ef4444;
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #fb923c;
+  --chart-1: #f97316;
+  --chart-2: #14b8a6;
+  --chart-3: #eab308;
+  --chart-4: #8b5cf6;
+  --chart-5: #ec4899;
+  --sidebar: #1c1917;
+  --sidebar-foreground: #fafaf9;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #292524;
+  --sidebar-accent-foreground: #fafaf9;
+  --sidebar-border: #292524;
+  --sidebar-ring: #f97316;
+}
+
+/* Storefront pages that still use default-light shadcn components
+   (sign in/register, shop) — scoped to .storefront-theme so Card/
+   Input/Form/Button/Accordion render in the site's dark/orange brand
+   instead of the default light theme, without per-element overrides.
+   Fixed dark palette (matches Navbar/Footer/meal-builder sections,
+   which are hardcoded dark regardless of any theme toggle). */
+.storefront-theme {
+  --background: #0a1806;
+  --foreground: #ffffff;
+  --card: #0f2109;
+  --card-foreground: #ffffff;
+  --popover: #0f2109;
+  --popover-foreground: #ffffff;
+  --primary: #e1262d;
+  --primary-foreground: #ffffff;
+  --secondary: #183310;
+  --secondary-foreground: #ffffff;
+  --muted: #183310;
+  --muted-foreground: #a3b39b;
+  --accent: #183310;
+  --accent-foreground: #f7c318;
+  --destructive: #ef4444;
+  --border: #214419;
+  --input: #214419;
+  --ring: #e1262d;
+}
+
+/* Shawon Food Gate brand palette, scoped to the public website (applied
+   in app/(root)/(website)/layout.jsx). Tailwind v4 utilities read these
+   variables, so the inherited black/zinc/orange classes render in the
+   SFG forest-green / red / gold theme without touching the admin panel. */
+.sfg-site {
+  --sfg-red: #e1262d;
+  --sfg-gold: #f7c318;
+  --sfg-green: #4a8a22;
+  --sfg-deep: #0a1806;
+  --color-black: #0a1806;
+  --color-zinc-950: #0a1806;
+  --color-zinc-900: #12280c;
+  --color-zinc-800: #1c3a13;
+  --color-zinc-700: #2a5220;
+  --color-zinc-600: #4f6147;
+  --color-zinc-500: #6e8066;
+  --color-zinc-400: #a3b39b;
+  --color-zinc-300: #c9d4c3;
+  --color-neutral-950: #0a1806;
+  --color-neutral-900: #12280c;
+  --color-neutral-800: #1c3a13;
+  --color-orange-400: #ee3b41;
+  --color-orange-500: #e1262d;
+  --color-orange-600: #c41d23;
+  --color-amber-400: #f7c318;
+  --color-amber-500: #e5b20f;
+  background: #0a1806;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.font-script {
+  font-family: var(--font-script), cursive;
+}
+
+/* Gold dotted texture used on hero/section backgrounds (flyer pattern) */
+.sfg-dots {
+  background-image: radial-gradient(rgba(247, 195, 24, 0.09) 1.5px, transparent 1.6px);
+  background-size: 22px 22px;
+}
+
+@keyframes sfg-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-sfg-marquee {
+  animation: sfg-marquee 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sfg-marquee {
+    animation: none;
+  }
+}
+
+/* Bottom padding that clears iPhone's Home Indicator safe area (falls
+   back to a plain 1rem on devices/browsers without it — env() resolves
+   to nothing there, so the max() just picks the fallback). Used by
+   scrollable modal content that can otherwise end up partly behind the
+   Home Indicator or a fixed bottom nav — see components/ui/Application/
+   website/customorders.jsx's "Select Items" modal. */
+.pb-safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.admin-theme.dark,
+.dark .admin-theme {
+  --background: #18181b;
+  --foreground: #fafafa;
+  --card: #27272a;
+  --card-foreground: #fafafa;
+  --popover: #27272a;
+  --popover-foreground: #fafafa;
+  --primary: #fb923c;
+  --primary-foreground: #1c1917;
+  --secondary: #2dd4bf;
+  --secondary-foreground: #042f2e;
+  --muted: #3f3f46;
+  --muted-foreground: #a1a1aa;
+  --accent: #422006;
+  --accent-foreground: #fde68a;
+  --destructive: #f87171;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #fb923c;
+  --sidebar: #0c0a09;
+  --sidebar-foreground: #fafaf9;
+  --sidebar-primary: #fb923c;
+  --sidebar-primary-foreground: #1c1917;
+  --sidebar-accent: #1c1917;
+  --sidebar-accent-foreground: #fafaf9;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #fb923c;
+}
+
+.slick-dots {
+  bottom: 15px !important;
+}
+
+/* Make all buttons transparent and remove content */
+.slick-dots li button {
+  background: transparent !important; /* remove default background */
+  border: none !important; /* remove border */
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 0 5px;
+  cursor: pointer;
+  overflow: hidden; /* prevent pseudo-element overflow */
+}
+
+/* Remove default Slick bullet */
+.slick-dots li button:before {
+  content: none !important; /* completely remove default dot */
+}
+
+/* Add your custom white circle with stroke using after pseudo */
+.slick-dots li button::after {
+  content: "";
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ffffff; /* solid white dot */
+  border: 3px solid #000000; /* stroke around dot */
+  transition:
+    transform 0.3s,
+    border-color 0.3s;
+  box-sizing: border-box;
+}
+
+/* Optional: active dot bigger */
+.slick-dots li.slick-active button::after {
+  transform: scale(1.2);
+  border-color: #000000;
+}
+
+/* Remove default Shadcn icons and focus rings */
+[data-radix-collection-item] svg.lucide-chevron-down {
+  display: none !important;
+}
+
+.group:hover {
+  text-decoration: none !important;
+}
+
+[data-state="open"] > .group {
+  text-decoration: none !important;
+}
+
+@layer utilities {
+  @keyframes click-pop {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  /* This class will be triggered on hover/active */
+  .animate-pop {
+    animation: click-pop 0.5s ease-out;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #receipt,
+  #receipt * {
+    visibility: visible !important;
+  }
+
+  #receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* 2-column print grid */
+  .print-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    padding: 10px;
+  }
+
+  .label-cell {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+}
+
+/* Opening a drawer/dialog (cart, menus) locks page scroll, which hides the
+   scrollbar and made the page jump sideways by its width. Always reserve
+   the scrollbar's space so nothing moves when the lock turns on. */
+html {
+  scrollbar-gutter: stable;
+}
+
+
+body[data-scroll-locked] {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
