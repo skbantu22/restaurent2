@@ -42,6 +42,7 @@ export const SFG_PHONE_HREF = "tel:+442039956692";
 const NAV_LINKS = [
   { label: "Home", href: WEBSITE_HOME },
   { label: "Menu", href: "/#our-menu" },
+  { label: "Demo 2", href: "/demo-2" },
   { label: "Order Online", href: WEBSITE_SHOP },
   { label: "Delivery", href: "/#delivery", wide: true },
   { label: "Collection", href: "/#delivery", wide: true },
@@ -66,7 +67,7 @@ function NavItem({ href, label, wide }) {
   return (
     <Link
       href={href}
-      className={`group relative py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
+      className={`group relative whitespace-nowrap py-2 text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
         wide ? "hidden 2xl:inline-block" : "inline-block"
       } ${isActive ? "text-[#F7C318]" : "text-white/90 hover:text-[#F7C318]"}`}
     >
@@ -196,7 +197,7 @@ const Navbar = () => {
             </div>
 
             {/* CENTER MENU (Desktop) */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+            <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
               {NAV_LINKS.map((item) => (
                 <NavItem key={item.label} {...item} />
               ))}
@@ -207,11 +208,11 @@ const Navbar = () => {
               {!auth ? (
                 <Link
                   href={WEBSITE_LOGIN}
-                  className="flex h-11 items-center gap-2 rounded-full px-2.5 text-sm font-semibold text-white/90 transition-colors hover:text-[#F7C318] xl:border xl:border-white/15 xl:px-4 xl:hover:border-[#F7C318]/60"
+                  className="flex h-11 items-center gap-2 rounded-full px-2.5 text-sm font-semibold text-white/90 transition-colors hover:text-[#F7C318] 2xl:border 2xl:border-white/15 2xl:px-4 2xl:hover:border-[#F7C318]/60"
                   aria-label="Login or sign up"
                 >
                   <User strokeWidth={2.3} className="h-[21px] w-[21px]" />
-                  <span className="hidden xl:inline">Login / Sign Up</span>
+                  <span className="hidden 2xl:inline">Login / Sign Up</span>
                 </Link>
               ) : avatarUrl ? (
                 <Link href={USER_DASHBOARD} className="flex h-11 w-11 items-center justify-center">

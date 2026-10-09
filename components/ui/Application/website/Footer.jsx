@@ -7,7 +7,9 @@ import { Phone, Mail, MapPin, Clock, ArrowRight } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaTiktok } from "react-icons/fa6";
 import { motion } from "framer-motion";
 
+import { usePathname } from "next/navigation";
 import SfgLogo from "./SfgLogo";
+import Demo2Footer from "./demo2/Demo2Footer";
 import { USER_TRACK_ORDER, WEBSITE_SHOP, WEBSITE_TERMS_AND_CONDITION } from "@/Route/Websiteroute";
 
 const FOOTER_GRID_VARIANTS = {
@@ -86,6 +88,9 @@ export default function Footer() {
   const email = settings?.email || "";
   const address = settings?.address || "179 Forest Ln, London E7 9BB";
   const hourGroups = groupOpeningHours(settings?.openingHours);
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/demo-2")) return <Demo2Footer />;
 
   return (
     <footer className="relative w-full overflow-hidden border-t-4 border-[#F7C318] bg-[#071204] text-white">

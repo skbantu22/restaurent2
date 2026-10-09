@@ -7,7 +7,7 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
 
 // UI Components - Ensure these paths match your project structure
@@ -95,6 +95,23 @@ export default function Login() {
       setServerMsg(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Demo only: one-click admin login (enabled by NEXT_PUBLIC_DEMO_ADMIN_LOGIN)
+  const [demoLoading, setDemoLoading] = useState(false);
+  const handleDemoAdmin = async () => {
+    try {
+      setDemoLoading(true);
+      const { data } = await axios.post("/api/auth/demo-login");
+      if (!data.success) throw new Error(data.message);
+      dispatch(login(data));
+      showToast("success", data.message);
+      router.push(ADMIN_DASHBOARD);
+    } catch (error) {
+      showToast("error", error.response?.data?.message || error.message);
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -200,6 +217,18 @@ export default function Login() {
                 loading={loading}
                 text="Sign In"
               />
+
+              {process.env.NEXT_PUBLIC_DEMO_ADMIN_LOGIN === "true" && (
+                <button
+                  type="button"
+                  onClick={handleDemoAdmin}
+                  disabled={demoLoading}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#F7C318] text-sm font-extrabold uppercase tracking-wide text-[#0A1806] transition-all hover:brightness-105 disabled:opacity-60"
+                >
+                  <LayoutDashboard size={17} />
+                  {demoLoading ? "Opening admin…" : "Enter Admin Panel (Demo)"}
+                </button>
+              )}
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">

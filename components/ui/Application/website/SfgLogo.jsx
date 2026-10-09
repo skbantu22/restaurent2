@@ -65,7 +65,7 @@ export default function SfgLogo({ className = "", compact = false }) {
   return (
     <span className={`flex items-center gap-2.5 ${className}`}>
       <SfgEmblem className={compact ? "h-11 w-11" : "h-12 w-12 lg:h-14 lg:w-14"} />
-      <span className="flex flex-col leading-none">
+      <span className="flex flex-col whitespace-nowrap leading-none">
         <span className="font-display text-[11px] lg:text-xs font-black tracking-[0.32em] text-[#F7C318]">
           SHAWON
         </span>

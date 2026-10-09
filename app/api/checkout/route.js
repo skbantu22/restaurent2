@@ -14,7 +14,9 @@ import { fireServerPurchaseConversion } from "@/lib/meta/firePurchaseConversion"
 import { customMealPrice } from "@/lib/mealDeal";
 
 // Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Placeholder keeps the build from crashing when the key is not set yet;
+// real payments need STRIPE_SECRET_KEY in the environment.
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_missing_key");
 const getAbsoluteImageUrl = (image, origin) => {
   if (!image || typeof image !== "string") return "";
 
@@ -422,8 +424,8 @@ export async function POST(req) {
       discounts: discounts.length > 0 ? discounts : undefined,
       client_reference_id: order._id.toString(),
       customer_email: customer.email || undefined,
-      success_url: `${origin}/order/success?orderId=${order._id.toString()}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/checkout?canceled=true`,
+      success_url: `${origin}${sitePrefix}/order/success?orderId=${order._id.toString()}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}${sitePrefix}/checkout?canceled=true`,
       metadata: {
         orderId: order._id.toString(),
         orderNumber: orderNumber,

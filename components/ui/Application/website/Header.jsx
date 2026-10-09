@@ -1,11 +1,14 @@
-import React from 'react'
-import Navbar from './Navbar'
+"use client";
 
-// Navbar already renders its own sticky, full-opacity header — this
-// used to wrap it in a second sticky/no-background div, which added a
-// duplicate stacking layer with nothing painted on it.
+import { usePathname } from "next/navigation";
+import Navbar from "./Navbar";
+import Demo2Navbar from "./demo2/Demo2Navbar";
+
+// Demo 2 (light, flyer-style design) gets its own header so the client
+// can compare both looks; every other page uses the main Navbar.
 const Header = () => {
-  return <Navbar />
-}
+  const pathname = usePathname();
+  return pathname?.startsWith("/demo-2") ? <Demo2Navbar /> : <Navbar />;
+};
 
-export default Header
+export default Header;
