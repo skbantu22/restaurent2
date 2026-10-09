@@ -45,6 +45,11 @@ const restaurantSettingsSchema = new mongoose.Schema(
         trim: true,
       },
     },
+    // Dine-in tables shown in the POS (AmarSolution-style "Select Table")
+    tables: {
+      type: [String],
+      default: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
+    },
     payments: {
       cashEnabled: { type: Boolean, default: true },
       cardEnabled: { type: Boolean, default: true },

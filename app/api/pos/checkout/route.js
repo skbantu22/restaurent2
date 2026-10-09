@@ -18,10 +18,9 @@ const itemSchema = z.object({
 });
 
 const bodySchema = z.object({
-  // Dine-in/takeaway remain valid on the Order model itself (used
-  // elsewhere already), but this POS is scoped to collection/delivery
-  // per the current SmashedLDN takeaway/delivery operation.
-  orderType: z.enum(["pickup", "delivery"]),
+  orderType: z.enum(["dine_in", "takeaway", "pickup", "delivery"]),
+  table: z.string().trim().optional().default(""),
+  waiter: z.string().trim().optional().default(""),
   customer: z.object({
     userId: z.string().trim().optional().nullable(),
     name: z.string().trim().optional().default("Walk-in Customer"),
@@ -41,7 +40,8 @@ const bodySchema = z.object({
   discountType: z.enum(["fixed", "percentage"]).optional().default("fixed"),
   discountValue: z.coerce.number().min(0).optional().default(0),
   notes: z.string().trim().optional().default(""),
-  paymentMethod: z.enum(["cash", "card"]),
+  // "pending" = sent to the kitchen now, paid later (AmarSolution "Order")
+  paymentMethod: z.enum(["cash", "card", "pending"]),
   cashReceived: z.coerce.number().min(0).optional().nullable(),
   // Client-generated once per checkout attempt (regenerated after
   // success/cart-clear). Retrying the same attempt (double-click,
@@ -113,7 +113,7 @@ export async function POST(request) {
         orderType: data.orderType,
         discountType: data.discountType,
         discountValue: data.discountValue,
-        paymentMethod: data.paymentMethod,
+        paymentMethod: data.paymentMethod === "pending" ? undefined : data.paymentMethod,
         cashReceived: data.paymentMethod === "cash" ? data.cashReceived : undefined,
         deliveryFee: settings.business.deliveryFee,
       });
@@ -124,7 +124,12 @@ export async function POST(request) {
       throw err;
     }
 
+    if (data.orderType === "dine_in" && !data.table) {
+      return response(false, 400, "Please select a table for dine-in orders.");
+    }
+
     const orderNumber = await getNextPosOrderNumber();
+    const payLater = data.paymentMethod === "pending";
 
     let order;
     try {
@@ -134,6 +139,7 @@ export async function POST(request) {
         source: "pos",
         cashierId: auth.userId || null,
         orderType: data.orderType,
+        table: data.orderType === "dine_in" ? data.table : "",
         userId: data.customer.userId || null,
         customer: {
           name: data.customer.name || "Walk-in Customer",
@@ -146,15 +152,17 @@ export async function POST(request) {
         deliveryFee: totals.deliveryFee,
         discount: totals.discount,
         total: totals.total,
-        payment: {
-          method: data.paymentMethod,
-          status: "paid",
-          paidAt: new Date(),
-          cashReceived: data.paymentMethod === "cash" ? data.cashReceived : null,
-          changeDue: totals.changeDue,
-        },
+        payment: payLater
+          ? { method: "cash", status: "pending", paidAt: null, cashReceived: null, changeDue: null }
+          : {
+              method: data.paymentMethod,
+              status: "paid",
+              paidAt: new Date(),
+              cashReceived: data.paymentMethod === "cash" ? data.cashReceived : null,
+              changeDue: totals.changeDue,
+            },
         orderStatus: "placed",
-        notes: data.notes,
+        notes: [data.waiter ? `Waiter: ${data.waiter}` : "", data.notes].filter(Boolean).join(" · "),
       });
     } catch (err) {
       // A concurrent duplicate submit can race past the findOne check
