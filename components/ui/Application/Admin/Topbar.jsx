@@ -14,7 +14,7 @@ import AdminMobileSearch from "./AdminMobileSearch";
 // AmarSolution-style quick links (top right of every admin page)
 export const QUICK_LINKS = [
   { label: "Purchases", href: "/admin/inventory/purchase-orders", icon: Wallet, cls: "bg-[#1E9E50] hover:bg-[#178643]" },
-  { label: "Kitchen", href: "/admin/orders", icon: ChefHat, cls: "bg-[#7B2CBF] hover:bg-[#6A1FB0]" },
+  { label: "Kitchen", href: "/admin/kitchen", icon: ChefHat, cls: "bg-[#7B2CBF] hover:bg-[#6A1FB0]" },
   { label: "Today's Summary", summary: true, icon: BarChart3, cls: "bg-[#2D7DD2] hover:bg-[#2369B5]" },
   { label: "New Order", href: "/admin/pos", icon: ShoppingCart, cls: "bg-[#2F6B16] hover:bg-[#245511]" },
 ];

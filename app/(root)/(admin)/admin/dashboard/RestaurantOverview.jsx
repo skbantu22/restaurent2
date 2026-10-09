@@ -27,6 +27,12 @@ import {
   Wallet,
   X,
   BarChart3,
+  ChefHat as ChefHatIcon,
+  Clock,
+  CookingPot,
+  Bike,
+  ShoppingBag,
+  Store,
 } from "lucide-react";
 
 // Restaurant dashboard (AmarSolution-style): quick links, four solid
@@ -181,6 +187,91 @@ export default function RestaurantOverview() {
             )}
           </motion.div>
         ))}
+      </div>
+
+      {/* Floor, kitchen & today (like the 360 restaurant dashboard) */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel
+          className="lg:col-span-2"
+          title="Tables"
+          right={
+            <span className="flex items-center gap-3 text-xs font-semibold">
+              <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm bg-[#0AA553]" />Free {(data?.tables || []).filter((t) => !t.busy).length}</span>
+              <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm bg-[#E2344F]" />Busy {(data?.tables || []).filter((t) => t.busy).length}</span>
+              <Link href="/admin/pos" className="text-[#2D7DD2] hover:underline">Open POS</Link>
+            </span>
+          }
+        >
+          <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 xl:grid-cols-6">
+            {(data?.tables || []).map((t) => (
+              <Link key={t.name} href="/admin/pos" title={t.busy ? "Open bill — pay it from On Going Order in the POS" : "Free — open POS"}
+                className={`flex flex-col items-center justify-center rounded-lg border-2 px-2 py-3 text-center transition hover:shadow-md ${t.busy ? "border-[#E2344F] bg-[#FFF1F3]" : "border-[#BFE8D0] bg-[#F1FBF5]"}`}>
+                <UtensilsCrossed size={20} className={t.busy ? "text-[#E2344F]" : "text-[#0AA553]"} />
+                <b className="mt-1 text-sm">{t.name}</b>
+                <span className={`text-xs font-semibold ${t.busy ? "text-[#E2344F]" : "text-[#0AA553]"}`}>{t.busy ? money(t.total) : "Free"}</span>
+              </Link>
+            ))}
+          </div>
+        </Panel>
+
+        <div className="space-y-6">
+          <Panel title="Kitchen" right={<Link href="/admin/kitchen" className="text-xs font-semibold text-[#2D7DD2] hover:underline">Open kitchen</Link>}>
+            <div className="grid grid-cols-3 gap-2">
+              {[["placed", "New", Clock, "#E2344F"], ["preparing", "Cooking", CookingPot, "#E08A00"], ["ready", "Ready", ChefHatIcon, "#0AA553"]].map(([k, label, Icon, c]) => (
+                <Link key={k} href="/admin/kitchen" className="rounded-lg border px-1 py-3 text-center transition hover:shadow-md">
+                  <Icon size={20} className="mx-auto" style={{ color: c }} />
+                  <b className="mt-1 block text-2xl tabular-nums">{data?.kitchen?.[k] || 0}</b>
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                </Link>
+              ))}
+            </div>
+          </Panel>
+          <Panel title="Today's Orders">
+            <ul className="space-y-2">
+              {[["dine_in", "Dine In", UtensilsCrossed, "#2B5FD9"], ["takeaway", "Takeaway", ShoppingBag, "#7B2CBF"], ["pickup", "Collection", Store, "#0AA553"], ["delivery", "Delivery", Bike, "#E08A00"]].map(([k, label, Icon, c]) => (
+                <li key={k} className="flex items-center gap-3 rounded-lg border px-3 py-2">
+                  <Icon size={18} style={{ color: c }} />
+                  <span className="flex-1 text-sm">{label}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">{money(data?.byType?.[k]?.total)}</span>
+                  <b className="w-6 text-right tabular-nums">{data?.byType?.[k]?.count || 0}</b>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel className="lg:col-span-2" title="Last 7 Days Sale" right={<span className="text-sm font-bold text-[#0AA553]">{money((data?.week || []).reduce((s, w) => s + w.total, 0))}</span>}>
+          <div className="h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data?.week || []} margin={{ left: -10, right: 8, top: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => `£${v}`} />
+                <Tooltip formatter={(v) => money(v)} labelFormatter={(l, p) => p?.[0]?.payload?.date || l} />
+                <Bar dataKey="total" name="Sales" fill="#0AA553" radius={[6, 6, 0, 0]} barSize={34} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+        <Panel title="Best Selling Today">
+          {!data?.bestToday?.length ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">{isLoading ? "Loading…" : "No sales yet today."}</p>
+          ) : (
+            <ul className="space-y-2">
+              {data.bestToday.map((b, i) => (
+                <li key={b.name} className="flex items-center gap-3 rounded-lg border p-1.5">
+                  <span className="relative flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-md bg-muted">
+                    {b.image ? <img src={b.image} alt="" className="h-full w-full object-cover" /> : <b className="text-muted-foreground">{i + 1}</b>}
+                  </span>
+                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{b.name}</span><span className="text-xs text-muted-foreground">{b.qty} sold</span></span>
+                  <b className="text-sm tabular-nums">{money(b.amount)}</b>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
       </div>
 
       {/* Charts */}

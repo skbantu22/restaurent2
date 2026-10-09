@@ -345,7 +345,7 @@ export default function POSPage() {
         <button type="button" onClick={reset} className="h-10 rounded bg-[#1F4FD8] px-4 text-sm font-semibold text-white hover:brightness-110">New Order</button>
         <button type="button" onClick={() => loadOrders("ongoing")} className="h-10 rounded bg-[#7B2CBF] px-4 text-sm font-semibold text-white hover:brightness-110">On Going Order</button>
         <button type="button" onClick={() => loadOrders("today")} className="h-10 rounded bg-[#2D8EB5] px-4 text-sm font-semibold text-white hover:brightness-110">Today&apos;s Order</button>
-        <Link href="/admin/orders" className="flex h-10 items-center gap-1.5 rounded bg-[#E1262D] px-4 text-sm font-semibold text-white hover:brightness-110"><ChefHat size={16} /> Kitchen</Link>
+        <Link href="/admin/kitchen" className="flex h-10 items-center gap-1.5 rounded bg-[#E1262D] px-4 text-sm font-semibold text-white hover:brightness-110"><ChefHat size={16} /> Kitchen</Link>
 
         <div className="ml-auto flex overflow-hidden rounded border border-zinc-300 bg-white">
           {ORDER_TYPES.map(([v, l]) => (

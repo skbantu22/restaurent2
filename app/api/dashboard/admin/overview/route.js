@@ -7,6 +7,7 @@ import UserModel from "@/models/User.model";
 import SupplierModel from "@/models/Supplier.model";
 import IngredientModel from "@/models/Ingredient.model";
 import PurchaseOrderModel from "@/models/PurchaseOrder.model";
+import { getRestaurantSettings } from "@/lib/settings.server";
 
 // Dashboard overview: headline cards, monthly sales for the current year,
 // top 10 foods & customers this month, and outstanding (unpaid) amounts.
@@ -49,7 +50,8 @@ export async function GET() {
     const month = londonStart("month");
     const year = londonStart("year");
 
-    const [customers, products, suppliers, todayAgg, monthly, topFoods, topCustomers, receivable, todayCounts, lowStock, payable] =
+    const week = new Date(today.getTime() - 6 * 86400000);
+    const [customers, products, suppliers, todayAgg, monthly, topFoods, topCustomers, receivable, todayCounts, lowStock, payable, kitchenAgg, byTypeAgg, weekAgg, bestToday, openTables, settings] =
       await Promise.all([
         UserModel.countDocuments({ deletedAt: null, role: "user" }),
         ProductModel.countDocuments({ deletedAt: null }),
@@ -141,6 +143,41 @@ export async function GET() {
           { $sort: { amount: -1 } },
           { $limit: 10 },
         ]),
+
+        // Kitchen queue right now (any day)
+        OrderModel.aggregate([
+          { $match: { deletedAt: null, orderStatus: { $in: ["placed", "preparing", "ready"] } } },
+          { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
+        ]),
+
+        // Today by order type
+        OrderModel.aggregate([
+          { $match: { ...live, createdAt: { $gte: today } } },
+          { $group: { _id: "$orderType", count: { $sum: 1 }, total: { $sum: "$total" } } },
+        ]),
+
+        // Last 7 days
+        OrderModel.aggregate([
+          { $match: { ...live, createdAt: { $gte: week } } },
+          { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Europe/London" } }, total: { $sum: "$total" }, orders: { $sum: 1 } } },
+        ]),
+
+        // Best selling today
+        OrderModel.aggregate([
+          { $match: { ...live, createdAt: { $gte: today } } },
+          { $unwind: "$items" },
+          { $group: { _id: "$items.name", qty: { $sum: "$items.quantity" }, amount: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }, image: { $first: "$items.image" } } },
+          { $sort: { qty: -1 } },
+          { $limit: 5 },
+        ]),
+
+        // Open (unpaid) dine-in bills per table
+        OrderModel.aggregate([
+          { $match: { deletedAt: null, orderType: "dine_in", table: { $ne: "" }, orderStatus: { $ne: "cancelled" }, "payment.status": "pending" } },
+          { $group: { _id: "$table", total: { $sum: "$total" }, since: { $min: "$createdAt" } } },
+        ]),
+
+        getRestaurantSettings(),
       ]);
 
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -163,6 +200,19 @@ export async function GET() {
       })),
       topFoods: topFoods.map((f) => ({ name: f._id, qty: f.qty, amount: round(f.amount) })),
       topCustomers: topCustomers.map((c) => ({ name: c.name, phone: c.phone, orders: c.orders, amount: round(c.amount) })),
+      kitchen: Object.fromEntries(kitchenAgg.map((k) => [k._id, k.count])),
+      byType: Object.fromEntries(byTypeAgg.map((t) => [t._id, { count: t.count, total: round(t.total) }])),
+      week: Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(week.getTime() + i * 86400000 + 12 * 3600000);
+        const key = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(d);
+        const w = weekAgg.find((x) => x._id === key);
+        return { date: key, day: new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short" }).format(d), total: round(w?.total), orders: w?.orders || 0 };
+      }),
+      bestToday: bestToday.map((b) => ({ name: b._id, qty: b.qty, amount: round(b.amount), image: b.image })),
+      tables: (settings.tables?.length ? settings.tables : []).map((name) => {
+        const o = openTables.find((t) => t._id === name);
+        return { name, busy: !!o, total: round(o?.total), since: o?.since || null };
+      }),
       lowStock: lowStock.map((i) => ({ name: i.name, stock: i.currentStock, minimum: i.minimumStock, unit: i.usageUnit })),
       suppliersPayable: payable.map((p) => ({ name: p.s?.[0]?.companyName || "Supplier", orders: p.orders, amount: round(p.amount) })),
       receivable: receivable.map((c) => ({ name: c.name, phone: c.phone, orders: c.orders, amount: round(c.amount) })),
