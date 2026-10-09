@@ -133,37 +133,51 @@
    public website keeps its own neutral palette untouched. Warm
    orange/teal/amber instead of the site-wide grayscale tokens. */
 .admin-theme {
-  --background: #fffaf5;
-  --foreground: #1c1917;
+  --background: #f6f8f3;
+  --foreground: #1a2614;
   --card: #ffffff;
-  --card-foreground: #1c1917;
+  --card-foreground: #1a2614;
   --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #f97316;
+  --popover-foreground: #1a2614;
+  --primary: #2f6b16;
   --primary-foreground: #ffffff;
-  --secondary: #14b8a6;
+  --secondary: #e1262d;
   --secondary-foreground: #ffffff;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #fef3c7;
-  --accent-foreground: #92400e;
-  --destructive: #ef4444;
-  --border: #e7e5e4;
-  --input: #e7e5e4;
-  --ring: #fb923c;
-  --chart-1: #f97316;
-  --chart-2: #14b8a6;
-  --chart-3: #eab308;
-  --chart-4: #8b5cf6;
-  --chart-5: #ec4899;
-  --sidebar: #1c1917;
-  --sidebar-foreground: #fafaf9;
-  --sidebar-primary: #f97316;
+  --muted: #f0f3ec;
+  --muted-foreground: #66735f;
+  --accent: #fff3cc;
+  --accent-foreground: #6b4e00;
+  --destructive: #e1262d;
+  --border: #e3e8de;
+  --input: #e3e8de;
+  --ring: #4a8a22;
+  --chart-1: #2f6b16;
+  --chart-2: #e1262d;
+  --chart-3: #f2b705;
+  --chart-4: #2d7dd2;
+  --chart-5: #7b2cbf;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #33402c;
+  --sidebar-primary: #2f6b16;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #292524;
-  --sidebar-accent-foreground: #fafaf9;
-  --sidebar-border: #292524;
-  --sidebar-ring: #f97316;
+  --sidebar-accent: #e9f4e2;
+  --sidebar-accent-foreground: #2f6b16;
+  --sidebar-border: #e3e8de;
+  --sidebar-ring: #2f6b16;
+  /* inherited orange accents → Shawon green */
+  --color-orange-50: #f1f7ec;
+  --color-orange-100: #e2efd8;
+  --color-orange-400: #4a8a22;
+  --color-orange-500: #2f6b16;
+  --color-orange-600: #245511;
+  --color-orange-700: #1c4410;
+}
+
+/* AmarSolution-style active sidebar item: green bar on the left */
+.admin-theme [data-sidebar="menu-button"][data-active="true"],
+.admin-theme [data-sidebar="menu-sub-button"][data-active="true"] {
+  box-shadow: inset 3px 0 0 #2f6b16;
+  font-weight: 600;
 }
 
 /* Storefront pages that still use default-light shadcn components
@@ -256,8 +270,8 @@
 .sfg-cart-light [class*="border-[#333]"] {
   border-color: rgba(31, 51, 19, 0.12) !important;
 }
-.sfg-cart-light button.bg-[#E1262D],
-.sfg-cart-light .bg-[#E1262D] {
+.sfg-cart-light button[class*="bg-[#E1262D]"],
+.sfg-cart-light [class*="bg-[#E1262D]"] {
   color: #ffffff !important;
 }
 

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-import CountOverview from "./CountOverview";
+import RestaurantOverview from "./RestaurantOverview";
 import SalesOverview from "./SalesOverview";
 import QuickAdd from "./QuickAdd";
 import Earnings from "./Earnings";
@@ -26,7 +26,7 @@ const Page = () => {
   return (
     <div className="pb-10">
       <motion.div initial="hidden" animate="show" variants={fadeUp} transition={{ duration: 0.35 }}>
-        <CountOverview />
+        <RestaurantOverview />
       </motion.div>
 
       <SalesOverview />

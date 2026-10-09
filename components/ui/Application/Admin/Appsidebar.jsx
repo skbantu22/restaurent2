@@ -1,5 +1,6 @@
 "use client";
 
+import SfgLogo from "@/components/ui/Application/website/SfgLogo";
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -44,9 +45,7 @@ export default function Appsidebar() {
     <Sidebar className="z-50">
       <SidebarHeader className="border-b h-14 p-0">
         <div className="flex justify-between items-center px-4">
-          <h1 className="text-xl font-bold tracking-wide text-primary">
-            Shawon Food Gate
-          </h1>
+          <SfgLogo compact tone="dark" />
 
           <Button
             onClick={toggleSidebar}

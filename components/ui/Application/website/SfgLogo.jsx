@@ -61,15 +61,15 @@ export function SfgEmblem({ className = "h-12 w-12" }) {
   );
 }
 
-export default function SfgLogo({ className = "", compact = false }) {
+export default function SfgLogo({ className = "", compact = false, tone = "light" }) {
   return (
     <span className={`flex items-center gap-2.5 ${className}`}>
       <SfgEmblem className={compact ? "h-11 w-11" : "h-12 w-12 lg:h-14 lg:w-14"} />
       <span className="flex flex-col whitespace-nowrap leading-none">
-        <span className="font-display text-[11px] lg:text-xs font-black tracking-[0.32em] text-[#F7C318]">
+        <span className={`font-display text-[11px] lg:text-xs font-black tracking-[0.32em] ${tone === "dark" ? "text-[#C99A00]" : "text-[#F7C318]"}`}>
           SHAWON
         </span>
-        <span className="font-display text-[19px] lg:text-[23px] font-black tracking-tight text-white">
+        <span className={`font-display text-[19px] lg:text-[23px] font-black tracking-tight ${tone === "dark" ? "text-[#1A2614]" : "text-white"}`}>
           Food <span className="text-[#E1262D]">Gate</span>
         </span>
       </span>
