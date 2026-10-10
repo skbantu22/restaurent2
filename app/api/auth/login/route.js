@@ -35,9 +35,9 @@ export async function POST(request) {
     const { email, password } = validatedData.data;
 
     // ---------------- FIND USER ----------------
-    const getUser = await UserModel.findOne({ email }).select("+password");
+    // Disabled staff accounts (deletedAt set) cannot log in
+    const getUser = await UserModel.findOne({ email, deletedAt: null }).select("+password");
 
-    console.log("LOGIN USER FROM DB:", getUser);
 
     if (!getUser) {
       return response(false, 404, "Invalid login credentials.");
@@ -124,7 +124,6 @@ export async function POST(request) {
       },
     };
 
-    console.log("FINAL RESPONSE DATA:", responseData);
 
     return response(true, 200, "Login success.", responseData);
   } catch (error) {

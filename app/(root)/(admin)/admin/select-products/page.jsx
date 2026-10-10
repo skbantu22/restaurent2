@@ -147,16 +147,16 @@ export default function ShowroomVariantAssign() {
 
   // ---------------- UI ----------------
   return (
-    <div className="grid grid-cols-12 gap-4 p-4 bg-gray-100 min-h-screen">
+    <div className="grid grid-cols-12 gap-4 p-2 sm:p-4 bg-gray-100 min-h-screen">
       {/* LEFT */}
-      <div className="col-span-8 bg-white rounded-2xl p-4">
+      <div className="col-span-12 lg:col-span-8 min-w-0 bg-white rounded-2xl p-3 sm:p-4">
         {/* TOP BAR */}
-        <div className="flex gap-3 mb-4 items-center">
+        <div className="flex flex-wrap gap-3 mb-4 items-center">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="border p-2 rounded w-[220px]"
+            className="border p-2 rounded w-full sm:w-[220px]"
           />
 
           <select
@@ -175,7 +175,7 @@ export default function ShowroomVariantAssign() {
 
         {/* PRODUCTS */}
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array(8)
               .fill(0)
               .map((_, i) => (
@@ -187,7 +187,7 @@ export default function ShowroomVariantAssign() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
               {products.map((p) => {
                 const count = selectedVariants[p._id]?.length || 0;
 
@@ -228,7 +228,7 @@ export default function ShowroomVariantAssign() {
       </div>
 
       {/* RIGHT */}
-      <div className="col-span-4 bg-white rounded-2xl p-4 h-[95vh] overflow-y-auto">
+      <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl p-3 sm:p-4 lg:h-[95vh] overflow-y-auto">
         <h2 className="font-bold mb-3">Selected Variants</h2>
 
         {selectedSummary.length === 0 ? (
@@ -291,8 +291,8 @@ export default function ShowroomVariantAssign() {
 
       {/* MODAL */}
       {openProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white w-[420px] p-4 rounded">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-[420px] p-4 rounded">
             <h2 className="font-bold mb-3">{openProduct.name}</h2>
 
             {openProduct.variants.map((v) => {

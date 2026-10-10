@@ -133,37 +133,37 @@
    public website keeps its own neutral palette untouched. Warm
    orange/teal/amber instead of the site-wide grayscale tokens. */
 .admin-theme {
-  --background: #f6f8f3;
-  --foreground: #1a2614;
+  --background: #f3f6f8;
+  --foreground: #212529;
   --card: #ffffff;
-  --card-foreground: #1a2614;
+  --card-foreground: #212529;
   --popover: #ffffff;
   --popover-foreground: #1a2614;
-  --primary: #2f6b16;
+  --primary: #1bab70;
   --primary-foreground: #ffffff;
   --secondary: #e1262d;
   --secondary-foreground: #ffffff;
-  --muted: #f0f3ec;
-  --muted-foreground: #66735f;
+  --muted: #f1f3f5;
+  --muted-foreground: #6c757d;
   --accent: #fff3cc;
   --accent-foreground: #6b4e00;
   --destructive: #e1262d;
-  --border: #e3e8de;
-  --input: #e3e8de;
-  --ring: #4a8a22;
+  --border: #e6ebf1;
+  --input: #e3e3e3;
+  --ring: #188ae2;
   --chart-1: #2f6b16;
   --chart-2: #e1262d;
   --chart-3: #f2b705;
   --chart-4: #2d7dd2;
   --chart-5: #7b2cbf;
   --sidebar: #ffffff;
-  --sidebar-foreground: #33402c;
-  --sidebar-primary: #2f6b16;
+  --sidebar-foreground: #343a40;
+  --sidebar-primary: #1bab70;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e9f4e2;
-  --sidebar-accent-foreground: #2f6b16;
-  --sidebar-border: #e3e8de;
-  --sidebar-ring: #2f6b16;
+  --sidebar-accent: #e2f6eb;
+  --sidebar-accent-foreground: #15965f;
+  --sidebar-border: #eef1f4;
+  --sidebar-ring: #1bab70;
   /* inherited orange accents → Shawon green */
   --color-orange-50: #f1f7ec;
   --color-orange-100: #e2efd8;
@@ -176,7 +176,7 @@
 /* AmarSolution-style active sidebar item: green bar on the left */
 .admin-theme [data-sidebar="menu-button"][data-active="true"],
 .admin-theme [data-sidebar="menu-sub-button"][data-active="true"] {
-  box-shadow: inset 3px 0 0 #2f6b16;
+  box-shadow: inset 3px 0 0 #1bab70;
   font-weight: 600;
 }
 

@@ -1,599 +1,266 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+// Add Food — AmarSolution style: Name / Category / Branch, Image / Price /
+// Discount, VAT, Description and a Recipe table, with Save / List at the bottom.
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import axios from "axios";
-import slugify from "slugify";
-import Image from "next/image";
-import { useQueryClient } from "@tanstack/react-query";
-import { X, ImageIcon, LayoutGrid } from "lucide-react";
-
-// UI Components
-import BreadCrumb from "@/components/ui/Application/Admin/Breadcrubm";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import ButtonLoading from "@/components/ui/Application/ButtonLoading";
-import Select from "@/components/ui/Select";
-import Editor from "@/components/ui/Application/Admin/Editor";
-import MediaModal from "@/components/ui/Application/Admin/MediaModel";
-import UploadMedia from "@/components/ui/Application/Admin/uploadmedia";
-
-// Utilities & Config
-import { ADMIN_CATEGORY_SHOW, ADMIN_DASHBOARD } from "@/Route/Adminpannelroute";
-import { zSchema } from "@/lib/zodschema";
+import { List, Loader2, Plus, Save, Trash2, X, ImagePlus } from "lucide-react";
 import { showToast } from "@/lib/showToast";
-import useFetch from "@/hooks/useFetch";
-import { z } from "zod";
+import { ADMIN_PRODUCT_SHOW } from "@/Route/Adminpannelroute";
 
-const breadcrumbData = [
-  { href: ADMIN_DASHBOARD, label: "Home" },
-  { href: ADMIN_CATEGORY_SHOW, label: "Products" },
-  { href: "#", label: "New Product" },
-];
+const emptyRow = () => ({ key: Math.random().toString(36).slice(2), ingredient: "", unit: "", quantity: "" });
+const label = "mb-1.5 block text-[13px] font-semibold text-foreground";
+const input = "h-10 w-full rounded border border-input bg-background px-3 text-sm outline-none transition focus:border-[#188ae2] focus:ring-2 focus:ring-[#2F6B16]/15";
 
-// Badge Options
-const BADGE_OPTIONS = [
-  { label: "None", value: "" },
-  { label: "MUST TRY", value: "MUST TRY" },
-  { label: "NEW", value: "NEW" },
-  { label: "HOT", value: "HOT" },
-  { label: "POPULAR", value: "POPULAR" },
-  { label: "MEGA", value: "MEGA" },
-];
-
-// Custom Meal builder base tag — lets this product show up under
-// "Select Beef/Chicken/Plant Based Items" in the meal builder
-// (components/ui/Application/website/customorders.jsx) regardless of
-// which display category it's filed under.
-const MEAL_BUILDER_OPTIONS = [
-  { label: "None", value: "" },
-  { label: "Beef", value: "beef" },
-  { label: "Chicken", value: "chicken" },
-  { label: "Plant Based", value: "plant" },
-];
-
-const AddProduct = () => {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
+function SearchSelect({ value, onChange, options, placeholder }) {
   const [open, setOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState([]);
-  const [resetKey, setResetKey] = useState(0);
+  const [q, setQ] = useState("");
+  const ref = useRef(null);
+  const selected = options.find((o) => o.value === value);
+  const list = options.filter((o) => o.label.toLowerCase().includes(q.trim().toLowerCase()));
 
-  // Schema synced with backend requirements
-  const formSchema = zSchema
-    .pick({
-      name: true,
-      slug: true,
-      category: true,
-      mrp: true,
-      sellingPrice: true,
-      discountPercentage: true,
-      description: true,
-      media: true,
-      freeDelivery: true,
-      calories: true,
-    })
-    .extend({
-      subcategory: z.string().optional().or(z.literal("")),
-      badge: z.string().optional().or(z.literal("")),
-      isMostLoved: z.boolean().default(false),
-      mealBuilderType: z.enum(["", "beef", "chicken", "plant"]).optional(),
-    });
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      category: "",
-      subcategory: "",
-      mrp: "",
-      sellingPrice: "",
-      discountPercentage: "0",
-      description: "",
-      media: [],
-      freeDelivery: false,
-      badge: "",
-      isMostLoved: false,
-      mealBuilderType: "",
-      calories: "",
-    },
-  });
-
-  // Category Fetching
-  const { data: getCategory } = useFetch(
-    "/api/category?deleteType=SD&size=10000",
-  );
-  // Bangladeshi Special tick: switches the category list between
-  // Bangladeshi Special categories (e.g. Dhaka Flavours) and normal menu
-  // categories. The product lands wherever its category is shown.
-  const [bangladeshiSpecial, setBangladeshiSpecial] = useState(false);
-
-  const categoryOption = useMemo(() => {
-    if (getCategory?.success) {
-      return getCategory.data
-        .filter((cat) => Boolean(cat.isBangladeshiSpecial) === bangladeshiSpecial)
-        .map((cat) => ({
-          label: cat.name,
-          value: cat._id,
-        }));
-    }
-    return [];
-  }, [getCategory, bangladeshiSpecial]);
-
-  // Subcategory Fetching based on Category Selection
-  const watchedCategoryId = form.watch("category");
-  const subUrl = useMemo(
-    () =>
-      watchedCategoryId
-        ? `/api/subcategory?category=${watchedCategoryId}&deleteType=SD`
-        : null,
-    [watchedCategoryId],
-  );
-  const { data: getSubCategory } = useFetch(subUrl);
-
-  const subCategoryOption = useMemo(() => {
-    if (getSubCategory?.success) {
-      return getSubCategory.data.map((sub) => ({
-        label: sub.name,
-        value: sub._id,
-      }));
-    }
-    return [];
-  }, [getSubCategory]);
-
-  // Helper for Gallery Media
-  const handleSetSelectedMedia = (newMediaOrFn) => {
-    setSelectedMedia((prev) => {
-      const updated =
-        typeof newMediaOrFn === "function" ? newMediaOrFn(prev) : newMediaOrFn;
-      form.setValue(
-        "media",
-        updated.map((m) => m._id),
-        { shouldValidate: true },
-      );
-      return updated;
-    });
-  };
-
-  // Discount Calculation Helper
-  const updateDiscount = (mrpVal, sellingVal) => {
-    const mrp = Number(mrpVal);
-    const selling = Number(sellingVal);
-    if (mrp > 0 && selling > 0) {
-      const discount = Math.max(0, Math.round(((mrp - selling) / mrp) * 100));
-      form.setValue("discountPercentage", discount.toString());
-    } else {
-      form.setValue("discountPercentage", "0");
-    }
-  };
-
-  const onSubmit = async (values) => {
-    const cleanText = values.description.replace(/<[^>]*>/g, "").trim();
-    if (!cleanText) {
-      showToast("error", "Product description cannot be empty!");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { data: response } = await axios.post(
-        "/api/product/create",
-        values,
-      );
-      if (response?.success) {
-        showToast("success", "Listing Published!");
-        form.reset();
-        setSelectedMedia([]);
-        setResetKey((p) => p + 1);
-      }
-    } catch (error) {
-      console.error("PRODUCT SUBMIT ERROR:", error);
-      showToast(
-        "error",
-        error?.response?.data?.message || "Check required fields or connection",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const close = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
 
   return (
-    <div className="bg-[#f1f1f1] min-h-screen pb-20 lg:pb-10 font-sans">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-4 space-y-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <BreadCrumb breadcrumbData={breadcrumbData} />
-                <h1 className="text-2xl font-black text-black tracking-tight uppercase">
-                  New Product
-                </h1>
-              </div>
-              <ButtonLoading
-                type="submit"
-                loading={loading}
-                text="PUBLISH PRODUCT"
-                className="bg-black text-white px-10 rounded-none h-12 shadow-xl tracking-widest"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* LEFT COLUMN */}
-              <div className="lg:col-span-8 space-y-6">
-                <Card className="border-2 border-black rounded-none shadow-none bg-white">
-                  <CardHeader className="bg-black py-3 rounded-none">
-                    <CardTitle className="text-xs font-bold text-white uppercase tracking-[0.2em]">
-                      Product Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase">
-                            Product Name
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ex: Classic Fit Sweatshirt"
-                              className="h-11 border-black rounded-none"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                const nameVal = e.target.value;
-                                if (nameVal) {
-                                  const baseSlug = slugify(nameVal, {
-                                    lower: true,
-                                    strict: true,
-                                  });
-                                  const uniqueId = Date.now()
-                                    .toString(36)
-                                    .slice(-4);
-                                  form.setValue(
-                                    "slug",
-                                    `${baseSlug}-${uniqueId}`,
-                                    { shouldValidate: true },
-                                  );
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase">
-                            Description *
-                          </FormLabel>
-                          <FormControl>
-                            <div className="border-2 border-black overflow-hidden bg-white">
-                              <Editor
-                                key={resetKey}
-                                initialData={field.value}
-                                onChange={(event, editor) =>
-                                  field.onChange(editor.getData())
-                                }
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Media Gallery Card */}
-                <Card className="border-2 border-black rounded-none shadow-none bg-white">
-                  <CardHeader className="bg-black py-3 rounded-none">
-                    <CardTitle className="text-xs font-bold text-white uppercase flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4" /> Gallery
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                      {selectedMedia.map((m) => (
-                        <div
-                          key={m._id}
-                          className="relative aspect-[3/4] border-2 border-black bg-zinc-50"
-                        >
-                          <Image
-                            src={m.url || m.secure_url}
-                            fill
-                            alt="Gallery"
-                            className="object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleSetSelectedMedia((p) =>
-                                p.filter((x) => x._id !== m._id),
-                              )
-                            }
-                            className="absolute top-1 right-1 bg-black text-white p-1"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => setOpen(true)}
-                        className="aspect-[3/4] border-2 border-dashed border-black flex flex-col items-center justify-center gap-2 hover:bg-zinc-100 transition-colors"
-                      >
-                        <LayoutGrid className="w-6 h-6" />
-                        <span className="text-[10px] font-black uppercase">
-                          + ADD
-                        </span>
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-center pt-4 border-t border-black/10">
-                      <p className="text-[10px] font-black uppercase opacity-50">
-                        Cloud Upload:
-                      </p>
-                      <UploadMedia
-                        isMultiple={true}
-                        queryClient={queryClient}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* RIGHT COLUMN */}
-              <div className="lg:col-span-4 space-y-6">
-                <Card className="border-2 border-black rounded-none shadow-none bg-white">
-                  <CardHeader className="bg-black py-3 rounded-none">
-                    <CardTitle className="text-xs font-bold text-white uppercase">
-                      Pricing & Category
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-5 space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="mrp"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase">
-                              MRP
-                            </FormLabel>
-                            <Input
-                              className="h-10 border-black rounded-none"
-                              type="number"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                updateDiscount(
-                                  e.target.value,
-                                  form.getValues("sellingPrice"),
-                                );
-                              }}
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="sellingPrice"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase">
-                              Sale Price
-                            </FormLabel>
-                            <Input
-                              className="h-10 border-black rounded-none font-bold text-blue-600"
-                              type="number"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                updateDiscount(
-                                  form.getValues("mrp"),
-                                  e.target.value,
-                                );
-                              }}
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="calories"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase">
-                              Calories (kcal)
-                            </FormLabel>
-
-                            <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="680"
-                                className="h-10 border-black rounded-none"
-                                {...field}
-                              />
-                            </FormControl>
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="bg-zinc-100 border-2 border-black p-3 text-center uppercase font-black text-xs italic">
-                      Discount: {form.watch("discountPercentage") || 0}% OFF
-                    </div>
-
-                    {/* Bangladeshi Special tick */}
-                    <label className="flex flex-row items-center justify-between border-2 border-black p-3 bg-zinc-50 cursor-pointer">
-                      <div className="space-y-0.5">
-                        <span className="block text-xs font-black uppercase">
-                          Bangladeshi Special 🇧🇩
-                        </span>
-                        <span className="block text-[10px] text-zinc-500 font-medium">
-                          Ticked: goes to the Bangladeshi Special section.
-                          Unticked: goes to Our Menu.
-                        </span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={bangladeshiSpecial}
-                        onChange={(e) => {
-                          setBangladeshiSpecial(e.target.checked);
-                          // the category list changes, so clear the old pick
-                          form.setValue("category", "", { shouldValidate: false });
-                        }}
-                        className="w-5 h-5 accent-black cursor-pointer border-2 border-black"
-                      />
-                    </label>
-
-                    {/* Category */}
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase">
-                            {bangladeshiSpecial
-                              ? "Bangladeshi Special Category"
-                              : "Category"}
-                          </FormLabel>
-                          <Select
-                            options={categoryOption}
-                            selected={field.value}
-                            setSelected={(val) =>
-                              field.onChange(
-                                typeof val === "string" ? val : val?.value,
-                              )
-                            }
-                          />
-                          {bangladeshiSpecial && categoryOption.length === 0 && (
-                            <p className="text-[10px] text-red-600 font-medium">
-                              No Bangladeshi Special category yet. Create one in
-                              Category with the Bangladeshi Special tick.
-                            </p>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <hr className="border-black border-dashed my-2" />
-
-                    {/* Badge Select */}
-                    <FormField
-                      control={form.control}
-                      name="badge"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase">
-                            Product Badge / Tag
-                          </FormLabel>
-                          <Select
-                            options={BADGE_OPTIONS}
-                            selected={field.value}
-                            setSelected={(val) =>
-                              field.onChange(
-                                typeof val === "string" ? val : val?.value,
-                              )
-                            }
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Custom Meal Builder Select */}
-                    <FormField
-                      control={form.control}
-                      name="mealBuilderType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase">
-                            Custom Meal Builder
-                          </FormLabel>
-                          <Select
-                            options={MEAL_BUILDER_OPTIONS}
-                            placeholder="None"
-                            selected={field.value}
-                            setSelected={(val) =>
-                              field.onChange(
-                                typeof val === "string" ? val : val?.value,
-                              )
-                            }
-                          />
-                          <p className="text-[10px] text-zinc-500 font-medium">
-                            Show this item under Select Beef/Chicken/Plant
-                            Based Items in the Custom Meal builder
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Our Most Loved Checkbox */}
-                    <FormField
-                      control={form.control}
-                      name="isMostLoved"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between border-2 border-black p-3 bg-zinc-50 space-y-0">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-xs font-black uppercase cursor-pointer">
-                              Our Most Loved 🔥
-                            </FormLabel>
-                            <p className="text-[10px] text-zinc-500 font-medium">
-                              Show in "Our Most Loved" section
-                            </p>
-                          </div>
-                          <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={(e) => field.onChange(e.target.checked)}
-                              className="w-5 h-5 accent-black cursor-pointer border-2 border-black"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </form>
-        </Form>
-      </div>
-
-      {/* Media Modal */}
-      <MediaModal
-        open={open}
-        setOpen={setOpen}
-        selectedMedia={selectedMedia}
-        setSelectedMedia={handleSetSelectedMedia}
-        isMultiple={true}
-      />
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} className={`${input} flex items-center justify-between text-left`}>
+        <span className={selected ? "" : "text-muted-foreground"}>{selected?.label || placeholder}</span>
+        <span className="text-xs text-muted-foreground">▼</span>
+      </button>
+      {open && (
+        <div className="absolute z-30 mt-1 w-full rounded border bg-popover shadow-lg">
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="h-9 w-full border-b bg-transparent px-3 text-sm outline-none" />
+          <ul className="max-h-60 overflow-y-auto py-1">
+            {list.map((o) => (
+              <li key={o.value}>
+                <button type="button" onClick={() => { onChange(o.value); setOpen(false); setQ(""); }}
+                  className={`block w-full px-3 py-2 text-left text-sm hover:bg-[#e2f6eb] ${o.value === value ? "bg-[#e2f6eb] font-semibold text-[#1bab70]" : ""}`}>
+                  {o.label}
+                </button>
+              </li>
+            ))}
+            {!list.length && <li className="px-3 py-2 text-sm text-muted-foreground">No match</li>}
+          </ul>
+        </div>
+      )}
     </div>
   );
-};
+}
 
-export default AddProduct;
+export default function AddFoodPage() {
+  const [categories, setCategories] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [form, setForm] = useState({ name: "", category: "", price: "", discountType: "amount", discount: "", vat: "", description: "", badge: "", isMostLoved: false, available: true });
+  const [image, setImage] = useState(null); // { _id, url }
+  const [uploading, setUploading] = useState(false);
+  const [rows, setRows] = useState([emptyRow()]);
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef(null);
+
+  useEffect(() => {
+    axios.get("/api/category", { params: { deleteType: "SD", size: 10000 } })
+      .then(({ data }) => setCategories((data.data || []).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)).map((c) => ({ value: c._id, label: c.name }))))
+      .catch(() => {});
+    axios.get("/api/admin/inventory/ingredients")
+      .then(({ data }) => setIngredients(data.data?.ingredients || []))
+      .catch(() => {});
+  }, []);
+
+  const ingOptions = useMemo(() => ingredients.map((i) => ({ value: i._id, label: `${i.name} (${i.usageUnit})` })), [ingredients]);
+  const set = (k) => (e) => { setForm((f) => ({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value })); setErrors((x) => ({ ...x, [k]: undefined })); };
+
+  const price = Number(form.price) || 0;
+  const disc = Number(form.discount) || 0;
+  const finalPrice = Math.max(0, form.discountType === "percent" ? price - (price * Math.min(disc, 100)) / 100 : price - disc);
+
+  async function upload(file) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("title", form.name || file.name);
+      const { data } = await axios.post("/api/admin/upload", fd);
+      if (!data.success) throw new Error(data.message);
+      setImage(data.data);
+    } catch (e) {
+      showToast("error", e.response?.data?.message || e.message);
+      if (fileRef.current) fileRef.current.value = "";
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const setRow = (key, patch) => setRows((r) => r.map((x) => (x.key === key ? { ...x, ...patch } : x)));
+
+  async function save() {
+    const e = {};
+    if (form.name.trim().length < 2) e.name = "Name is required";
+    if (!form.category) e.category = "Category is required";
+    if (form.price === "" || price < 0) e.price = "Price is required";
+    setErrors(e);
+    if (Object.keys(e).length) return showToast("error", "Please fill in the required fields");
+
+    setSaving(true);
+    try {
+      const recipe = rows.filter((r) => r.ingredient && Number(r.quantity) > 0).map((r) => ({ ingredient: r.ingredient, unit: r.unit, quantity: Number(r.quantity) }));
+      const { data } = await axios.post("/api/admin/foods", {
+        ...form,
+        price,
+        discount: disc,
+        vat: Number(form.vat) || 0,
+        media: image?._id || null,
+        recipe,
+      });
+      if (!data.success) throw new Error(data.message);
+      showToast("success", `${form.name} added${data.data.recipeItems ? ` with ${data.data.recipeItems}-item recipe` : ""}`);
+      setForm({ name: "", category: form.category, price: "", discountType: "amount", discount: "", vat: "", description: "", badge: "", isMostLoved: false, available: true });
+      setImage(null);
+      setRows([emptyRow()]);
+      if (fileRef.current) fileRef.current.value = "";
+    } catch (err) {
+      showToast("error", err.response?.data?.message || err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="pb-24">
+      <div className="rounded-[8px] border border-[#e6ebf1] bg-white p-5 shadow-sm sm:p-6">
+        <h1 className="mb-5 text-lg font-bold">Add Food</h1>
+
+        {/* row 1 */}
+        <div className="grid gap-5 md:grid-cols-3">
+          <div>
+            <label className={label}>Name <span className="text-[#E1262D]">*</span></label>
+            <input className={`${input} ${errors.name ? "border-[#E1262D]" : ""}`} value={form.name} onChange={set("name")} placeholder="e.g. Chicken Biryani" />
+            {errors.name && <p className="mt-1 text-xs text-[#E1262D]">{errors.name}</p>}
+          </div>
+          <div>
+            <label className={label}>Category <span className="text-[#E1262D]">*</span></label>
+            <SearchSelect value={form.category} onChange={(v) => { setForm((f) => ({ ...f, category: v })); setErrors((x) => ({ ...x, category: undefined })); }} options={categories} placeholder="Search Category" />
+            {errors.category && <p className="mt-1 text-xs text-[#E1262D]">{errors.category}</p>}
+          </div>
+          <div>
+            <label className={label}>Branch <span className="text-[#E1262D]">*</span></label>
+            <select className={input} disabled defaultValue="main"><option value="main">Shawon Food Gate — Forest Gate</option></select>
+          </div>
+        </div>
+
+        {/* row 2 */}
+        <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <div>
+            <label className={label}>Image</label>
+            <div className="flex items-center gap-3">
+              <label className={`${input} flex cursor-pointer items-center gap-2 text-muted-foreground`}>
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
+                <span className="truncate">{uploading ? "Uploading…" : image ? "Change image" : "Choose file"}</span>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0])} />
+              </label>
+              {image && (
+                <span className="relative h-10 w-10 flex-none overflow-hidden rounded border">
+                  <img src={image.url} alt="" className="h-full w-full object-cover" />
+                  <button type="button" onClick={() => { setImage(null); if (fileRef.current) fileRef.current.value = ""; }} className="absolute -right-0.5 -top-0.5 rounded-full bg-[#E1262D] p-0.5 text-white" aria-label="Remove image"><X size={10} /></button>
+                </span>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className={label}>Price (£) <span className="text-[#E1262D]">*</span></label>
+            <input type="number" min="0" step="0.01" className={`${input} ${errors.price ? "border-[#E1262D]" : ""}`} value={form.price} onChange={set("price")} placeholder="0.00" />
+            {errors.price && <p className="mt-1 text-xs text-[#E1262D]">{errors.price}</p>}
+          </div>
+          <div>
+            <label className={label}>Discount</label>
+            <div className="flex">
+              <select value={form.discountType} onChange={set("discountType")} className="h-10 rounded-l border border-[#F7C318] bg-[#F7C318] px-3 text-sm font-semibold text-[#1A2614] outline-none">
+                <option value="amount">Amount (£)</option>
+                <option value="percent">Percent (%)</option>
+              </select>
+              <input type="number" min="0" step="0.01" className={`${input} rounded-l-none`} value={form.discount} onChange={set("discount")} placeholder="0" />
+            </div>
+            {disc > 0 && price > 0 && <p className="mt-1 text-xs text-[#1bab70]">Customer pays £{finalPrice.toFixed(2)}</p>}
+          </div>
+        </div>
+
+        {/* row 3 */}
+        <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <div>
+            <label className={label}>Vat (%)</label>
+            <input type="number" min="0" max="100" step="0.1" className={input} value={form.vat} onChange={set("vat")} placeholder="0" />
+          </div>
+          <div>
+            <label className={label}>Badge (website)</label>
+            <select className={input} value={form.badge} onChange={set("badge")}>
+              <option value="">None</option>
+              {["Popular", "Best Seller", "Must Try", "New", "Spicy", "Fri & Sat"].map((b) => <option key={b}>{b}</option>)}
+            </select>
+          </div>
+          <div className="flex items-end gap-6 pb-2">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isMostLoved} onChange={set("isMostLoved")} className="h-4 w-4 accent-[#1bab70]" /> Show in Popular</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.available} onChange={set("available")} className="h-4 w-4 accent-[#1bab70]" /> Available</label>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <label className={label}>Description</label>
+          <textarea rows={3} className={`${input} h-auto py-2`} value={form.description} onChange={set("description")} placeholder="Description" />
+        </div>
+
+        {/* recipe */}
+        <div className="mt-6">
+          <h2 className="mb-2 text-[15px] font-bold">Recipe:</h2>
+          <div className="overflow-x-auto rounded border">
+            <table className="w-full min-w-[620px] text-sm">
+              <thead>
+                <tr className="border-b bg-muted/60 text-left">
+                  <th className="px-3 py-2.5 font-semibold">Product</th>
+                  <th className="w-36 px-3 py-2.5 font-semibold">Unit</th>
+                  <th className="w-44 px-3 py-2.5 font-semibold">Quantity</th>
+                  <th className="w-28 px-3 py-2.5 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={r.key} className="border-b last:border-0">
+                    <td className="px-2 py-2">
+                      <SearchSelect value={r.ingredient} placeholder="Search Product" options={ingOptions}
+                        onChange={(v) => setRow(r.key, { ingredient: v, unit: ingredients.find((x) => x._id === v)?.usageUnit || "" })} />
+                    </td>
+                    <td className="px-2 py-2"><input className={`${input} bg-muted/40`} value={r.unit} readOnly placeholder="—" /></td>
+                    <td className="px-2 py-2"><input type="number" min="0" step="0.001" className={input} value={r.quantity} onChange={(e) => setRow(r.key, { quantity: e.target.value })} placeholder="0" /></td>
+                    <td className="px-2 py-2">
+                      <div className="flex">
+                        <button type="button" onClick={() => setRows((x) => [...x.slice(0, i + 1), emptyRow(), ...x.slice(i + 1)])} className="flex h-9 w-9 items-center justify-center rounded-l bg-[#188ae2] text-white hover:brightness-110" aria-label="Add row"><Plus size={16} /></button>
+                        <button type="button" onClick={() => setRows((x) => (x.length > 1 ? x.filter((y) => y.key !== r.key) : [emptyRow()]))} className="flex h-9 w-9 items-center justify-center rounded-r bg-[#ff5b5b] text-white hover:brightness-110" aria-label="Remove row"><Trash2 size={15} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Ingredients used per portion. Leave empty if this food has no recipe yet.</p>
+        </div>
+      </div>
+
+      {/* bottom actions */}
+      <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-2 border-t bg-background/95 py-3 backdrop-blur md:left-64">
+        <button type="button" onClick={save} disabled={saving || uploading} className="flex h-10 items-center gap-2 rounded bg-[#188ae2] px-6 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">
+          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save
+        </button>
+        <Link href={ADMIN_PRODUCT_SHOW} className="flex h-10 items-center gap-2 rounded bg-[#10c469] px-6 text-sm font-semibold text-white hover:brightness-110">
+          <List size={16} /> List
+        </Link>
+      </div>
+    </div>
+  );
+}

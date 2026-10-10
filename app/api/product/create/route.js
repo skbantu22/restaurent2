@@ -4,9 +4,13 @@ import { zSchema } from "@/lib/zodschema";
 import ProductModel from "@/models/Product.model";
 import { encode } from "entities";
 import { z } from "zod";
+import { isAuthenticated } from "@/lib/auth.server";
 
 export async function POST(request) {
   try {
+    const auth = await isAuthenticated(["admin", "manager"]);
+    if (!auth.isAuth) return response(false, 403, "Unauthorized.");
+
     await connectDB();
 
     const payload = await request.json();

@@ -38,9 +38,14 @@ export async function GET() {
       .sort({ name: 1 })
       .lean();
 
+    // Waiters set up in Food Manage > Waiter, then staff logins
+    const named = (settings.waiters || []).map((name, i) => ({ _id: `w${i}`, name, role: "waiter" }));
+    const seen = new Set(named.map((w) => w.name.toLowerCase()));
+    const fromStaff = staff.filter((s) => !seen.has(s.name.toLowerCase())).map((s) => ({ _id: s._id, name: s.name, role: s.role }));
+
     return response(true, 200, "POS meta.", {
       tables: tables.map((name) => ({ name, busy: !!busy[name], ...(busy[name] || {}) })),
-      waiters: staff.map((s) => ({ _id: s._id, name: s.name, role: s.role })),
+      waiters: [...named, ...fromStaff],
     });
   } catch (error) {
     return catchError(error);

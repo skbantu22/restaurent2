@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { QUICK_LINKS } from "@/components/ui/Application/Admin/Topbar";
+import { Panel, theadClass, thClass, tdClass } from "@/components/ui/Application/Admin/kit";
 import Link from "next/link";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -41,34 +42,24 @@ import {
 
 const money = (n) => `£${Number(n || 0).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+// 360-style stat cards: tinted background, white icon square
 const CARDS = [
-  { key: "customers", label: "Total Customers", icon: Users, bg: "from-[#2F8F3A] to-[#1F6E28]" },
-  { key: "products", label: "Menu Items", icon: UtensilsCrossed, bg: "from-[#2D7DD2] to-[#1E5FA8]" },
-  { key: "suppliers", label: "Total Suppliers", icon: Truck, bg: "from-[#7B2CBF] to-[#5A189A]" },
-  { key: "todaySale", label: "Today's Sale", icon: Wallet, bg: "from-[#E8A317] to-[#C98A0A]", money: true },
+  { key: "todaySale", label: "Today's Sale", icon: Wallet, bg: "#e3f6ec", fg: "#0aa553", money: true, href: "/admin/reports?r=daily-sales" },
+  { key: "customers", label: "Total Customers", icon: Users, bg: "#e7efff", fg: "#2b5fd9", href: "/admin/customers" },
+  { key: "products", label: "Food Items", icon: UtensilsCrossed, bg: "#fff3d9", fg: "#e08a00", href: "/admin/product" },
+  { key: "suppliers", label: "Total Suppliers", icon: Truck, bg: "#f3e8ff", fg: "#8b43dc", href: "/admin/inventory/suppliers" },
 ];
 
-const BAR_COLORS = ["#2F6B16", "#E1262D", "#F2B705", "#2D7DD2", "#7B2CBF", "#4A8A22", "#F47B20", "#0F9D8C", "#C2185B", "#5D4037"];
+const BAR_COLORS = ["#f7941d", "#0aa553", "#2b5fd9", "#e2344f", "#8b43dc"];
 
-function Panel({ title, children, className = "", right }) {
-  return (
-    <div className={`overflow-hidden rounded-xl border-t-4 border-[#2F6B16] bg-card shadow-sm ${className}`}>
-      <div className="flex items-center justify-between px-5 pb-1 pt-4">
-        <h3 className="text-base font-bold">{title}</h3>
-        {right}
-      </div>
-      <div className="p-5 pt-3">{children}</div>
-    </div>
-  );
-}
 
 function RankTable({ rows, empty, valueLabel }) {
   if (!rows?.length) return <p className="py-8 text-center text-sm text-muted-foreground">{empty}</p>;
   return (
-    <div className="overflow-hidden rounded-lg border">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full min-w-[360px] text-sm">
         <thead>
-          <tr className="bg-[#2F6B16] text-left text-white">
+          <tr className="bg-[#00801a] text-left text-white">
             <th className="w-12 px-3 py-2.5 font-semibold">#</th>
             <th className="px-3 py-2.5 font-semibold">Customer</th>
             <th className="px-3 py-2.5 text-center font-semibold">Orders</th>
@@ -96,10 +87,10 @@ function RankTable({ rows, empty, valueLabel }) {
 function SimpleTable({ cols, rows, empty }) {
   if (!rows?.length) return <p className="py-8 text-center text-sm text-muted-foreground">{empty}</p>;
   return (
-    <div className="overflow-hidden rounded-lg border">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full min-w-[360px] text-sm">
         <thead>
-          <tr className="bg-[#2F6B16] text-left text-white">
+          <tr className="bg-[#00801a] text-left text-white">
             <th className="w-12 px-3 py-2.5 font-semibold">#</th>
             {cols.map((c) => (
               <th key={c.label} className={`px-3 py-2.5 font-semibold ${c.right ? "text-right" : ""}`}>{c.label}</th>
@@ -168,24 +159,17 @@ export default function RestaurantOverview() {
       </div>
 
       {/* Headline cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {CARDS.map(({ key, label, icon: Icon, bg, money: isMoney }, i) => (
-          <motion.div
-            key={key}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${bg} p-5 text-white shadow-md`}
-          >
-            <Icon className="absolute -bottom-3 -right-2 h-24 w-24 opacity-20" strokeWidth={1.5} />
-            <p className="relative text-3xl font-black tabular-nums">
-              {isLoading ? "…" : isMoney ? money(cards[key]) : (cards[key] ?? 0).toLocaleString()}
-            </p>
-            <p className="relative mt-1 text-sm font-medium text-white/90">{label}</p>
-            {key === "todaySale" && !isLoading && (
-              <p className="relative mt-0.5 text-xs text-white/80">{cards.todayOrders || 0} orders today</p>
-            )}
-          </motion.div>
+      <div className="grid gap-[14px] sm:grid-cols-2 xl:grid-cols-4">
+        {CARDS.map(({ key, label, icon: Icon, bg, fg, money: isMoney, href }) => (
+          <Link key={key} href={href} className="flex items-center gap-[16px] border border-white p-[20px] transition hover:-translate-y-[2px] hover:shadow-md" style={{ background: bg }}>
+            <span className="flex h-[56px] w-[56px] shrink-0 items-center justify-center bg-white" style={{ color: fg }}><Icon size={28} /></span>
+            <span className="min-w-0">
+              <strong className="block text-[22px] font-semibold leading-tight tabular-nums text-[#353535]">
+                {isLoading ? <span className="inline-block h-[22px] w-[60px] animate-pulse bg-[#eef0f3] align-middle" /> : isMoney ? money(cards[key]) : (cards[key] ?? 0).toLocaleString()}
+              </strong>
+              <span className="text-[15px] text-[#495057]">{label}{key === "todaySale" && !isLoading ? ` · ${cards.todayOrders || 0} orders` : ""}</span>
+            </span>
+          </Link>
         ))}
       </div>
 
@@ -276,21 +260,21 @@ export default function RestaurantOverview() {
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Sales This Year" right={<span className="text-sm font-bold text-[#2F6B16]">{money(yearTotal)}</span>}>
+        <Panel title="Sales This Year" right={<span className="text-sm font-bold text-[#1bab70]">{money(yearTotal)}</span>}>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data?.salesByMonth || []} margin={{ left: -10, right: 8, top: 8 }}>
                 <defs>
                   <linearGradient id="sfgArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2F6B16" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#2F6B16" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#188ae2" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#188ae2" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => `£${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`} />
                 <Tooltip formatter={(v) => money(v)} />
-                <Area type="monotone" dataKey="total" name="Sales" stroke="#2F6B16" strokeWidth={2.5} fill="url(#sfgArea)" dot={{ r: 3, fill: "#2F6B16" }} />
+                <Area type="monotone" dataKey="total" name="Sales" stroke="#188ae2" strokeWidth={2.5} fill="url(#sfgArea)" dot={{ r: 3, fill: "#188ae2" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -330,7 +314,7 @@ export default function RestaurantOverview() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Low Stock Alert" right={<Link href="/admin/inventory/ingredients" className="text-xs font-semibold text-[#2F6B16] hover:underline">Manage stock</Link>}>
+        <Panel title="Low Stock Alert" right={<Link href="/admin/inventory/ingredients" className="text-xs font-semibold text-[#1bab70] hover:underline">Manage stock</Link>}>
           <SimpleTable
             rows={data?.lowStock}
             empty={isLoading ? "Loading…" : "All ingredients are above their minimum level."}
@@ -365,7 +349,7 @@ export default function RestaurantOverview() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-2xl"
             >
-              <div className="flex items-center justify-between bg-[#2D7DD2] px-5 py-4 text-white">
+              <div className="flex items-center justify-between bg-[#188ae2] px-5 py-4 text-white">
                 <h3 className="flex items-center gap-2 font-bold"><ClipboardList size={18} /> Today&apos;s Summary</h3>
                 <button type="button" onClick={() => setSummaryOpen(false)} aria-label="Close"><X size={20} /></button>
               </div>

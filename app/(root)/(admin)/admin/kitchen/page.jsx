@@ -75,7 +75,7 @@ export default function KitchenPage() {
     <div className="pb-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold"><ChefHat className="text-[#2F6B16]" /> Kitchen Display</h1>
+          <h1 className="flex items-center gap-2 text-xl font-bold sm:text-2xl"><ChefHat className="text-[#1bab70]" /> Kitchen Display</h1>
           <p className="text-sm text-muted-foreground">Live orders from the website and POS · refreshes every 15 seconds</p>
         </div>
         <button type="button" onClick={load} className="flex h-9 items-center gap-2 rounded-md border bg-card px-3 text-sm font-semibold hover:bg-muted">
@@ -84,11 +84,11 @@ export default function KitchenPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-60 items-center justify-center"><Loader2 className="animate-spin text-[#2F6B16]" /></div>
+        <div className="flex h-60 items-center justify-center"><Loader2 className="animate-spin text-[#1bab70]" /></div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           {COLUMNS.map(({ key, title, icon: Icon, color, next, action }) => (
-            <section key={key} className="flex min-h-[60vh] flex-col overflow-hidden rounded-xl border bg-card">
+            <section key={key} className="flex min-h-[200px] flex-col overflow-hidden lg:min-h-[60vh] rounded-[8px] border border-[#e6ebf1] bg-white">
               <header className="flex items-center justify-between px-4 py-3 text-white" style={{ background: color }}>
                 <span className="flex items-center gap-2 text-lg font-bold"><Icon size={20} /> {title}</span>
                 <span className="rounded-full bg-white/25 px-2.5 py-0.5 text-sm font-black">{byStatus[key].length}</span>
@@ -114,7 +114,7 @@ export default function KitchenPage() {
                         <ul className="space-y-1 px-3 py-2">
                           {o.items.map((it, i) => (
                             <li key={i} className="text-sm">
-                              <b className="mr-1.5 text-[#2F6B16]">{it.quantity}×</b>{it.name}
+                              <b className="mr-1.5 text-[#1bab70]">{it.quantity}×</b>{it.name}
                               {it.notes && <span className="block pl-6 text-xs text-[#E2344F]">↳ {it.notes}</span>}
                             </li>
                           ))}
@@ -130,7 +130,7 @@ export default function KitchenPage() {
                             </button>
                           ) : (
                             <button type="button" disabled={busy === o._id} onClick={() => move(o, o.orderType === "delivery" ? "out_for_delivery" : "delivered")}
-                              className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-md bg-[#2F6B16] text-sm font-bold text-white disabled:opacity-60">
+                              className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-md bg-[#1bab70] text-sm font-bold text-white disabled:opacity-60">
                               {busy === o._id ? <Loader2 size={15} className="animate-spin" /> : o.orderType === "delivery" ? "Out for Delivery" : o.orderType === "dine_in" ? "Served" : "Collected"}
                             </button>
                           )}

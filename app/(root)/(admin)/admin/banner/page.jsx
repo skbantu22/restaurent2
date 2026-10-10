@@ -164,7 +164,7 @@ const BannerManager = () => {
         <div className="border border-dashed rounded-lg p-5 text-center space-y-4 bg-white">
           <h3 className="font-semibold text-gray-700">PC Banner (Wide)</h3>
           {pcMedia.length > 0 ? (
-            <div className="relative group mx-auto w-[240px] h-[120px]">
+            <div className="relative group mx-auto w-full max-w-[240px] h-[120px]">
               <Image
                 src={pcMedia[0].url || pcMedia[0].secure_url}
                 fill

@@ -50,6 +50,8 @@ const restaurantSettingsSchema = new mongoose.Schema(
       type: [String],
       default: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
     },
+    // Waiter names for the POS "Select Waiter" dropdown
+    waiters: { type: [String], default: [] },
     payments: {
       cashEnabled: { type: Boolean, default: true },
       cardEnabled: { type: Boolean, default: true },

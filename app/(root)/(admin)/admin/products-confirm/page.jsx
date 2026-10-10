@@ -110,9 +110,9 @@ export default function ShowroomTestPage() {
     .reduce((sum, v) => sum + v.price * v.qty, 0);
 
   return (
-    <div className="p-6 grid grid-cols-3 gap-6">
+    <div className="grid gap-6 p-3 sm:p-6 lg:grid-cols-3">
       {/* ================= LEFT: PRODUCTS ================= */}
-      <div className="col-span-2">
+      <div className="min-w-0 lg:col-span-2">
         <h1 className="text-xl font-bold mb-4">Product List</h1>
 
         <div className="grid grid-cols-2 gap-4">
@@ -192,8 +192,8 @@ export default function ShowroomTestPage() {
 
       {/* ================= POPUP ================= */}
       {openProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white w-[400px] p-5 rounded">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-[400px] p-5 rounded">
             <h2 className="font-bold mb-3">{openProduct.name}</h2>
 
             {openProduct.variants.map((v) => {

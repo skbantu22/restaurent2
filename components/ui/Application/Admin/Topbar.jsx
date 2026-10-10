@@ -13,7 +13,7 @@ import AdminMobileSearch from "./AdminMobileSearch";
 
 // AmarSolution-style quick links (top right of every admin page)
 export const QUICK_LINKS = [
-  { label: "Purchases", href: "/admin/inventory/purchase-orders", icon: Wallet, cls: "bg-[#1E9E50] hover:bg-[#178643]" },
+  { label: "Expense", href: "/admin/expenses", icon: Wallet, cls: "bg-[#1E9E50] hover:bg-[#178643]" },
   { label: "Kitchen", href: "/admin/kitchen", icon: ChefHat, cls: "bg-[#7B2CBF] hover:bg-[#6A1FB0]" },
   { label: "Today's Summary", summary: true, icon: BarChart3, cls: "bg-[#2D7DD2] hover:bg-[#2369B5]" },
   { label: "New Order", href: "/admin/pos", icon: ShoppingCart, cls: "bg-[#2F6B16] hover:bg-[#245511]" },
@@ -33,9 +33,9 @@ const Topbar = () => {
   const openSummary = useOpenSummary();
 
   return (
-    <div className="fixed left-0 top-0 z-30 flex h-14 w-full items-center justify-between border-b bg-white px-5 shadow-[0_1px_0_rgba(0,0,0,0.02)] dark:bg-background md:pe-8 md:ps-72">
-      <div className="flex items-center md:hidden">
-        <h1 className="text-lg font-bold">
+    <div className="fixed left-0 top-0 z-30 flex h-14 w-full items-center justify-between gap-2 border-b bg-white px-3 sm:px-5 shadow-[0_1px_0_rgba(0,0,0,0.02)] dark:bg-background md:pe-8 md:ps-72">
+      <div className="flex min-w-0 items-center md:hidden">
+        <h1 className="truncate text-base font-bold sm:text-lg">
           Shawon <span className="text-[#E1262D]">Food Gate</span>
         </h1>
       </div>
@@ -44,7 +44,7 @@ const Topbar = () => {
         <AdminSearch />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-none items-center gap-1 sm:gap-2">
         <div className="mr-2 hidden items-center gap-1.5 xl:flex">
           <span className="mr-1 text-sm font-semibold text-muted-foreground">Quick Links:</span>
           {QUICK_LINKS.map(({ label, href, summary, icon: Icon, cls }) =>
@@ -63,7 +63,7 @@ const Topbar = () => {
         <AdminMobileSearch />
         <Themeswitch />
         <UserDropDown />
-        <Button type="button" size="icon" className="ms-2 md:hidden" onClick={toggleSidebar}>
+        <Button type="button" size="icon" className="ms-1 md:hidden sm:ms-2" onClick={toggleSidebar} aria-label="Open menu">
           <RiMenu4Fill />
         </Button>
       </div>

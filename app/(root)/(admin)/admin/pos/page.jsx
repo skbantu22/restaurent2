@@ -68,13 +68,13 @@ const printUrl = (id, kitchen) => `/admin/orders/print/${id}${kitchen ? "?type=k
 
 function Modal({ title, onClose, children, wide, color = "bg-[#2F6B16]" }) {
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-2 sm:p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className={`flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg bg-white shadow-2xl ${wide ? "max-w-4xl" : "max-w-md"}`}>
         <div className={`flex items-center justify-between px-5 py-3 text-white ${color}`}>
           <h3 className="font-bold">{title}</h3>
           <button type="button" onClick={onClose} aria-label="Close"><X size={20} /></button>
         </div>
-        <div className="overflow-y-auto p-5 text-zinc-800">{children}</div>
+        <div className="overflow-y-auto p-3 text-zinc-800 sm:p-5">{children}</div>
       </div>
     </div>
   );
@@ -132,6 +132,7 @@ export default function POSPage() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState(null);
   const [search, setSearch] = useState("");
+  const [pane, setPane] = useState("menu"); // phones show one panel at a time: menu | bill
 
   const [cart, setCart] = useState([]);
   const [orderType, setOrderType] = useState("dine_in");
@@ -340,22 +341,29 @@ export default function POSPage() {
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-[#EEF1EC] text-zinc-800">
       {/* ===== top bar ===== */}
-      <div className="flex flex-wrap items-center gap-2 border-b bg-white px-3 py-2">
+      <div className="flex items-center gap-2 overflow-x-auto border-b bg-white px-2 py-2 sm:px-3 lg:flex-wrap [&>*]:flex-none [&>*]:whitespace-nowrap">
         <Link href="/admin/dashboard" className="flex h-10 w-12 items-center justify-center rounded bg-[#2F6B16] text-white" title="Back to dashboard"><Home size={18} /></Link>
-        <button type="button" onClick={reset} className="h-10 rounded bg-[#1F4FD8] px-4 text-sm font-semibold text-white hover:brightness-110">New Order</button>
-        <button type="button" onClick={() => loadOrders("ongoing")} className="h-10 rounded bg-[#7B2CBF] px-4 text-sm font-semibold text-white hover:brightness-110">On Going Order</button>
-        <button type="button" onClick={() => loadOrders("today")} className="h-10 rounded bg-[#2D8EB5] px-4 text-sm font-semibold text-white hover:brightness-110">Today&apos;s Order</button>
-        <Link href="/admin/kitchen" className="flex h-10 items-center gap-1.5 rounded bg-[#E1262D] px-4 text-sm font-semibold text-white hover:brightness-110"><ChefHat size={16} /> Kitchen</Link>
+        <button type="button" onClick={reset} className="h-10 rounded bg-[#1F4FD8] px-3 sm:px-4 text-sm font-semibold text-white hover:brightness-110">New Order</button>
+        <button type="button" onClick={() => loadOrders("ongoing")} className="h-10 rounded bg-[#7B2CBF] px-3 sm:px-4 text-sm font-semibold text-white hover:brightness-110">On Going Order</button>
+        <button type="button" onClick={() => loadOrders("today")} className="h-10 rounded bg-[#2D8EB5] px-3 sm:px-4 text-sm font-semibold text-white hover:brightness-110">Today&apos;s Order</button>
+        <Link href="/admin/kitchen" className="flex h-10 items-center gap-1.5 rounded bg-[#E1262D] px-3 sm:px-4 text-sm font-semibold text-white hover:brightness-110"><ChefHat size={16} /> Kitchen</Link>
 
         <div className="ml-auto flex overflow-hidden rounded border border-zinc-300 bg-white">
           {ORDER_TYPES.map(([v, l]) => (
-            <button key={v} type="button" onClick={() => setOrderType(v)} className={`h-10 px-3.5 text-sm font-semibold transition ${orderType === v ? "bg-[#2F6B16] text-white" : "hover:bg-zinc-100"}`}>{l}</button>
+            <button key={v} type="button" onClick={() => setOrderType(v)} className={`h-10 px-2.5 text-sm font-semibold transition sm:px-3.5 ${orderType === v ? "bg-[#2F6B16] text-white" : "hover:bg-zinc-100"}`}>{l}</button>
           ))}
         </div>
       </div>
 
+      {/* ===== phone tabs ===== */}
+      <div className="grid grid-cols-2 border-b bg-white text-sm font-bold lg:hidden">
+        {[["menu", "Menu"], ["bill", `Bill (${items})`]].map(([v, l]) => (
+          <button key={v} type="button" onClick={() => setPane(v)} className={`h-10 border-b-2 ${pane === v ? "border-[#2F6B16] text-[#2F6B16]" : "border-transparent text-zinc-500"}`}>{l}</button>
+        ))}
+      </div>
+
       {/* ===== body ===== */}
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
+      <div className="flex min-h-0 flex-1 gap-3 p-2 sm:p-3">
         {/* categories */}
         <div className="hidden w-[150px] flex-none space-y-1.5 overflow-y-auto pr-1 md:block">
           {[{ _id: null, name: "All" }, ...categories].map((c) => (
@@ -367,11 +375,26 @@ export default function POSPage() {
         </div>
 
         {/* food grid */}
-        <div className="min-w-0 flex-1 overflow-y-auto rounded bg-white p-3">
+        <div className={`min-w-0 flex-1 overflow-y-auto rounded bg-white p-2 sm:p-3 ${pane === "bill" ? "hidden lg:block" : ""}`}>
+          <div className="mb-2 space-y-2 lg:hidden">
+            <div className="flex h-10 items-center rounded border border-zinc-300">
+              <Search size={16} className="mx-2.5 flex-none text-zinc-500" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search food" className="h-full min-w-0 flex-1 text-sm outline-none" />
+              {search && <button type="button" onClick={() => setSearch("")} className="px-3 text-zinc-400" aria-label="Clear search"><X size={16} /></button>}
+            </div>
+            <div className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 md:hidden">
+              {[{ _id: null, name: "All" }, ...categories].map((c) => (
+                <button key={c._id || "all"} type="button" onClick={() => setCategory(c._id)}
+                  className={`flex-none whitespace-nowrap rounded px-3 py-1.5 text-xs font-semibold text-white ${category === c._id ? "bg-[#5DADE2]" : "bg-[#2F6B16]"}`}>
+                  {c.name.split(" · ")[0]}
+                </button>
+              ))}
+            </div>
+          </div>
           {loading ? (
             <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-[#2F6B16]" /></div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4 2xl:grid-cols-5">
               {visible.map((p) => {
                 const inCart = cart.find((i) => i.productId === p._id);
                 return (
@@ -393,16 +416,16 @@ export default function POSPage() {
         </div>
 
         {/* bill */}
-        <div className="flex w-full max-w-[560px] flex-none flex-col overflow-hidden rounded bg-white lg:w-[44%]">
-          <div className="flex h-11 items-center border-b">
+        <div className={`w-full flex-col overflow-hidden rounded bg-white lg:flex lg:w-[44%] lg:max-w-[560px] lg:flex-none ${pane === "bill" ? "flex" : "hidden"}`}>
+          <div className="hidden h-11 items-center border-b lg:flex">
             <span className="flex h-full w-11 items-center justify-center border-r bg-zinc-50 text-zinc-500"><Search size={17} /></span>
             <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Enter food name (F2)" className="h-full flex-1 px-3 text-sm outline-none" />
             {search && <button type="button" onClick={() => setSearch("")} className="px-3 text-zinc-400"><X size={16} /></button>}
           </div>
 
-          <div className="grid grid-cols-3 gap-2 border-b p-3">
+          <div className="grid grid-cols-2 gap-2 border-b p-2 sm:grid-cols-3 sm:p-3">
             {/* customer */}
-            <div className="relative">
+            <div className="relative col-span-2 sm:col-span-1">
               <div className="flex h-9 items-center gap-1.5 rounded border border-zinc-300 bg-white px-2 text-sm">
                 <User size={15} className="text-zinc-500" />
                 <input value={custOpen ? custQuery : customer?.name || ""} placeholder="Guest" onFocus={() => { setCustOpen(true); setCustQuery(""); }} onBlur={() => setTimeout(() => setCustOpen(false), 150)}
@@ -439,7 +462,7 @@ export default function POSPage() {
           </div>
 
           {orderType === "delivery" && (
-            <div className="grid grid-cols-[1fr_110px] gap-2 border-b p-3">
+            <div className="grid grid-cols-[1fr_100px] gap-2 border-b p-2 sm:p-3">
               <input className={sel} placeholder="Delivery address *" value={address.address} onChange={(e) => setAddress({ ...address, address: e.target.value })} />
               <input className={`${sel} uppercase`} placeholder="Postcode" value={address.postcode} onChange={(e) => setAddress({ ...address, postcode: e.target.value })} />
             </div>
@@ -450,9 +473,9 @@ export default function POSPage() {
             <table className="w-full text-sm">
               <thead className="sticky top-0">
                 <tr className="bg-[#1E9E50] text-white">
-                  <th className="px-3 py-2 text-left font-semibold">Name</th>
-                  <th className="w-[110px] px-2 py-2 font-semibold">Quantity</th>
-                  <th className="w-[70px] px-2 py-2 text-right font-semibold">Price</th>
+                  <th className="px-2 py-2 text-left font-semibold sm:px-3">Name</th>
+                  <th className="w-[104px] px-1 py-2 font-semibold sm:w-[110px] sm:px-2">Quantity</th>
+                  <th className="hidden w-[70px] px-2 py-2 text-right font-semibold sm:table-cell">Price</th>
                   <th className="w-[80px] px-2 py-2 text-right font-semibold">Total</th>
                   <th className="w-9 py-2"><button type="button" onClick={() => setCart([])} title="Clear items" className="mx-auto block opacity-90 hover:opacity-100"><Trash2 size={14} /></button></th>
                 </tr>
@@ -460,27 +483,27 @@ export default function POSPage() {
               <tbody>
                 {cart.map((i) => (
                   <tr key={i.productId} className="border-b">
-                    <td className="px-3 py-2 font-medium leading-tight">{i.name}</td>
-                    <td className="px-2 py-2">
+                    <td className="px-2 py-2 font-medium leading-tight sm:px-3">{i.name}</td>
+                    <td className="px-1 py-2 sm:px-2">
                       <div className="flex items-center justify-center">
                         <button type="button" onClick={() => qty(i.productId, -1)} className="flex h-7 w-7 items-center justify-center rounded-l border bg-zinc-50"><Minus size={12} /></button>
                         <input value={i.quantity} onChange={(e) => setQty(i.productId, e.target.value)} className="h-7 w-10 border-y text-center text-sm outline-none" inputMode="numeric" />
                         <button type="button" onClick={() => qty(i.productId, 1)} className="flex h-7 w-7 items-center justify-center rounded-r border bg-zinc-50"><Plus size={12} /></button>
                       </div>
                     </td>
-                    <td className="px-2 py-2 text-right tabular-nums">{i.price.toFixed(2)}</td>
+                    <td className="hidden px-2 py-2 text-right tabular-nums sm:table-cell">{i.price.toFixed(2)}</td>
                     <td className="px-2 py-2 text-right font-semibold tabular-nums">{(i.price * i.quantity).toFixed(2)}</td>
                     <td className="py-2 text-center"><button type="button" onClick={() => qty(i.productId, -i.quantity)} className="text-red-500 hover:text-red-700"><X size={15} /></button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {!cart.length && <p className="py-14 text-center text-sm text-zinc-400">Tap food on the left to add it to the bill.</p>}
+            {!cart.length && <p className="py-14 text-center text-sm text-zinc-400">Tap food in the menu to add it to the bill.</p>}
           </div>
 
           {/* summary */}
           <div className="border-t bg-zinc-50 text-sm">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1 px-3 py-2">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 px-3 py-2 sm:gap-x-6">
               <span className="flex justify-between"><span>Items</span><b>{items}</b></span>
               <span className="flex justify-between"><span>Total</span><b className="tabular-nums">{subtotal.toFixed(2)}</b></span>
               <span className="flex justify-between"><span>{orderType === "delivery" ? "Delivery fee" : "VAT"}</span><b className="tabular-nums">{orderType === "delivery" ? fee.toFixed(2) : "Incl."}</b></span>
@@ -502,18 +525,18 @@ export default function POSPage() {
       </div>
 
       {/* ===== bottom action bar ===== */}
-      <div className="flex h-16 flex-none items-stretch text-white">
-        <button type="button" onClick={reset} title="New order" className="flex w-16 items-center justify-center bg-[#8E7CC3] hover:brightness-110"><ChevronsLeft size={30} /></button>
-        <div className="flex flex-1 items-center justify-center bg-[#5B4BA6] text-2xl font-black tracking-wide">Total : {money(payable)}</div>
-        <button type="button" onClick={() => setModal("holds")} title="Hold list" className="relative flex w-16 items-center justify-center bg-[#B77B3C] hover:brightness-110">
-          <List size={24} />{holds.length > 0 && <span className="absolute right-2 top-2 rounded-full bg-white px-1.5 text-[11px] font-black text-[#B77B3C]">{holds.length}</span>}
+      <div className="flex h-14 flex-none items-stretch text-white sm:h-16">
+        <button type="button" onClick={reset} title="New order" className="hidden w-16 items-center sm:flex justify-center bg-[#8E7CC3] hover:brightness-110"><ChevronsLeft size={30} /></button>
+        <div className="hidden flex-1 items-center justify-center bg-[#5B4BA6] text-2xl font-black tracking-wide md:flex">Total : {money(payable)}</div>
+        <button type="button" onClick={() => setModal("holds")} title="Hold list" className="relative flex w-12 flex-none items-center sm:w-16 justify-center bg-[#B77B3C] hover:brightness-110">
+          <List size={24} />{holds.length > 0 && <span className="absolute right-1 top-1 rounded-full sm:right-2 sm:top-2 bg-white px-1.5 text-[11px] font-black text-[#B77B3C]">{holds.length}</span>}
         </button>
-        <button type="button" onClick={hold} className="w-24 bg-[#F7941D] text-xl font-bold hover:brightness-110 sm:w-32">Hold</button>
-        <button type="button" onClick={reset} className="w-24 bg-[#E81E4D] text-xl font-bold hover:brightness-110 sm:w-32">Clear</button>
-        <button type="button" disabled={busy} onClick={() => checks() && submit("pending")} className="w-24 bg-[#1F2BEA] text-xl font-bold hover:brightness-110 disabled:opacity-60 sm:w-36">
+        <button type="button" onClick={hold} className="flex-1 bg-[#F7941D] text-base font-bold hover:brightness-110 sm:text-xl md:w-32 md:flex-none">Hold</button>
+        <button type="button" onClick={reset} className="flex-1 bg-[#E81E4D] text-base font-bold hover:brightness-110 sm:text-xl md:w-32 md:flex-none">Clear</button>
+        <button type="button" disabled={busy} onClick={() => checks() && submit("pending")} className="flex-1 bg-[#1F2BEA] text-base font-bold hover:brightness-110 disabled:opacity-60 sm:text-xl md:w-36 md:flex-none">
           {busy && modal !== "pay" ? <Loader2 className="mx-auto animate-spin" /> : "Order"}
         </button>
-        <button type="button" onClick={() => checks() && setModal("pay")} className="w-36 bg-[#1E9E50] text-lg font-bold leading-tight hover:brightness-110 sm:w-48 sm:text-xl">Instant Payment</button>
+        <button type="button" onClick={() => checks() && setModal("pay")} className="flex-[1.4] bg-[#1E9E50] px-1 text-sm font-bold leading-tight hover:brightness-110 sm:text-xl md:w-48 md:flex-none">Instant Payment</button>
       </div>
 
       {/* ===== modals ===== */}
@@ -597,10 +620,10 @@ export default function POSPage() {
             </div>
           )}
           {modal === "today" && orders.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center sm:gap-3">
               <div className="rounded-lg bg-zinc-100 p-3"><p className="text-xs text-zinc-500">Orders</p><p className="text-xl font-black">{orders.filter((o) => o.orderStatus !== "cancelled").length}</p></div>
-              <div className="rounded-lg bg-zinc-100 p-3"><p className="text-xs text-zinc-500">Sales</p><p className="text-xl font-black">{money(orders.filter((o) => o.orderStatus !== "cancelled").reduce((s, o) => s + o.total, 0))}</p></div>
-              <div className="rounded-lg bg-zinc-100 p-3"><p className="text-xs text-zinc-500">Unpaid</p><p className="text-xl font-black text-[#E1262D]">{money(orders.filter((o) => o.orderStatus !== "cancelled" && o.payment?.status !== "paid").reduce((s, o) => s + o.total, 0))}</p></div>
+              <div className="rounded-lg bg-zinc-100 p-3"><p className="text-xs text-zinc-500">Sales</p><p className="text-base font-black sm:text-xl">{money(orders.filter((o) => o.orderStatus !== "cancelled").reduce((s, o) => s + o.total, 0))}</p></div>
+              <div className="rounded-lg bg-zinc-100 p-3"><p className="text-xs text-zinc-500">Unpaid</p><p className="text-base font-black text-[#E1262D] sm:text-xl">{money(orders.filter((o) => o.orderStatus !== "cancelled" && o.payment?.status !== "paid").reduce((s, o) => s + o.total, 0))}</p></div>
             </div>
           )}
           <p className="mt-3 flex items-center gap-1.5 text-xs text-zinc-500"><ClipboardList size={13} /> Unpaid dine-in orders keep their table busy until the bill is paid.</p>

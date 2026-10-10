@@ -231,7 +231,7 @@ export default function PurchaseOrderDetailPage({ params }) {
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-4 text-sm">
+      <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3 sm:gap-4">
         <div><span className="text-muted-foreground">Subtotal:</span> £{po.subtotal.toFixed(2)}</div>
         <div><span className="text-muted-foreground">VAT:</span> £{po.vatAmount.toFixed(2)}</div>
         <div className="font-semibold"><span className="text-muted-foreground font-normal">Total:</span> £{po.total.toFixed(2)}</div>
